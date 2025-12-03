@@ -8,9 +8,12 @@ MainMenuState = Class{__includes = BaseState}
 local selected_option = 0
 
 function MainMenuState:init()
+    self.background = BackgroundParallax()
 end
 
 function MainMenuState:update(dt)
+    self.background:update(dt)
+
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
@@ -29,6 +32,8 @@ function MainMenuState:update(dt)
 end
 
 function MainMenuState:render()
+    self.background:render()
+    
     love.graphics.setFont(gFonts['TitleFont'])
     love.graphics.setColor(255, 0, 0, 1)
     love.graphics.printf('Spell Slinger', 2, VIRTUAL_HEIGHT / 2 - 70, VIRTUAL_WIDTH, 'center')

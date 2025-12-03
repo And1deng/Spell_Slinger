@@ -1,2 +1,9 @@
 Fonts:
 Pixel Fonts Pack 2 by Mikiz (free for commercial use)
+
+Backgrounds:
+Backgrounds from Dark Forest by Val_DeMar (CC0)
+
+Tilemap:
+“Forgotten-Marshes asset pack by Jaraten”
+https://jaraten.itch.io/forgotten-marshes-asset-pack
