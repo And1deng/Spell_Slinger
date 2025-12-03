@@ -13,14 +13,14 @@ function love.load()
         resizable = true
     })
 
-    --love.graphics.setFont(gFonts['small'])
+    love.graphics.setFont(gFonts['TitleFont'])
 
     gStateMachine = StateMachine {
-        ['start'] = function() return StartState() end,
+        ['main_menu'] = function() return MainMenuState() end,
         ['play'] = function() return PlayState() end,
         ['game-over'] = function() return GameOverState() end
     }
-    gStateMachine:change('start')
+    gStateMachine:change('main_menu')
 
     love.keyboard.keysPressed = {}
 
@@ -39,11 +39,12 @@ function love.keyboard.wasPressed(key)
 end
 
 function love.update(dt)
-
+    gStateMachine:update(dt)
+    love.keyboard.keysPressed = {}
 end
 
 function love.draw()
     push:start()
-
+    gStateMachine:render()
     push:finish()
 end
