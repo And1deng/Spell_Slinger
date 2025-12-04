@@ -1,82 +1,122 @@
--- Room.lua
--- Generates a simple rectangular room using TILE_IDS
+Room = Class{}
 
-Room = {}
-Room.__index = Room
+function Room:init(player)
+    -- dimensions MUST be fields on self
+    self.width  = MAP_WIDTH
+    self.height = MAP_HEIGHT
 
-function Room:new(width, height)
-    local this = {
-        width = width,
-        height = height,
-        tiles = {} 
-    }
+    -- tile grid
+    self.tiles = {}
 
-    setmetatable(this, Room)
-
-    this:generate()
-    return this
+    -- assigned externally
+    self.player = player
 end
 
-function Room:generate()
+---------------------------------------------------------
+-- Generate a circular overworld
+---------------------------------------------------------
+function Room:generateCircularOverworld()
+    local cx = self.width / 2
+    local cy = self.height / 2
+    local radius = math.min(self.width, self.height) * 0.49
+    local radiusSq = radius * radius
+
     for y = 1, self.height do
-        table.insert(self.tiles, {})
+        self.tiles[y] = {}
 
         for x = 1, self.width do
-            local tileDef = nil
 
-            -- Corners
-            if x == 1 and y == 1 then
-                tileDef = TILE_IDS.DIRT_WALL_TOP_LEFT_CORNER
-            elseif x == 1 and y == self.height then
-                tileDef = TILE_IDS.DIRT_WALL_BOTTOM_LEFT_CORNER
-            elseif x == self.width and y == 1 then
-                tileDef = TILE_IDS.DIRT_WALL_TOP_RIGHT_CORNER
-            elseif x == self.width and y == self.height then
-                tileDef = TILE_IDS.DIRT_WALL_BOTTOM_RIGHT_CORNER
+            local dx = x - cx
+            local dy = y - cy
+            local distSq = dx * dx + dy * dy
 
-            -- Edges
-            elseif x == 1 then
-                tileDef = TILE_IDS.DIRT_WALL_LEFT_WALLS
-            elseif x == self.width then
-                tileDef = TILE_IDS.DIRT_WALL_RIGHT_WALLS
-            elseif y == 1 then
-                tileDef = TILE_IDS.DIRT_WALL_TOP_WALLS
-            elseif y == self.height then
-                tileDef = TILE_IDS.DIRT_WALL_BOTTOM_WALLS
+            if distSq <= radiusSq then
+                -- INSIDE CIRCLE = grass variants
+                local def = TILE_IDS.DARK_GRASS_FLOORS
+                local variant = def.variants[math.random(#def.variants)]
 
-            -- Floors
+                self.tiles[y][x] = {
+                    isFloor = true,
+                    sheet = def.sheet,
+                    id = variant
+                }
+
             else
-                tileDef = TILE_IDS.DARK_GRASS_FLOORS
+                -- OUTSIDE CIRCLE = void
+                self.tiles[y][x] = {
+                    isFloor = false,
+                    sheet = nil,
+                    id = nil
+                }
             end
-
-            -- Pick a random variant for the tile
-            local id = tileDef.variants[math.random(#tileDef.variants)]
-
-            -- Store both id and sheet for rendering
-            table.insert(self.tiles[y], {
-                id = id,
-                sheet = tileDef.sheet
-            })
         end
     end
+
+    -- auto–place borders around the circle
+    self:generateBorderWalls()
 end
 
-function Room:render(xOffset, yOffset, tileSize)
-    xOffset = xOffset or 0
-    yOffset = yOffset or 0
-    tileSize = tileSize or 16
-
+---------------------------------------------------------
+-- Generate walls around circle boundary
+---------------------------------------------------------
+function Room:generateBorderWalls()
     for y = 1, self.height do
         for x = 1, self.width do
             local tile = self.tiles[y][x]
 
-            love.graphics.draw(
-                gTextures[tile.sheet],
-                gFrames[tile.sheet][tile.id],
-                xOffset + (x - 1) * tileSize,
-                yOffset + (y - 1) * tileSize
-            )
+            if not tile.isFloor then
+                -- Check if touching a floor tile
+                local touching =
+                    (self.tiles[y-1] and self.tiles[y-1][x] and self.tiles[y-1][x].isFloor) or
+                    (self.tiles[y+1] and self.tiles[y+1][x] and self.tiles[y+1][x].isFloor) or
+                    (self.tiles[y][x-1] and self.tiles[y][x-1].isFloor) or
+                    (self.tiles[y][x+1] and self.tiles[y][x+1].isFloor)
+
+                if touching then
+                    local def = TILE_IDS.DIRT_WALL_TOP_WALLS
+                    tile.sheet = def.sheet
+                    tile.id = def.variants[math.random(#def.variants)]
+                end
+            end
         end
+    end
+end
+
+---------------------------------------------------------
+-- Update room + player
+---------------------------------------------------------
+function Room:update(dt)
+    if self.player then
+        self.player:update(dt)
+    end
+end
+
+---------------------------------------------------------
+-- Render all tiles + player
+---------------------------------------------------------
+function Room:render(xOffset, yOffset, tileSize)
+    xOffset = xOffset or 0
+    yOffset = yOffset or 0
+    tileSize = tileSize or 16
+    
+    -- Render tiles at offset positions
+    for y = 1, self.height do
+        for x = 1, self.width do
+            local tile = self.tiles[y][x]
+            if tile.sheet and tile.id then
+                love.graphics.draw(
+                    gTextures[tile.sheet],
+                    gFrames[tile.sheet][tile.id],
+                    xOffset + (x - 1) * tileSize,  -- This should work
+                    yOffset + (y - 1) * tileSize   -- This should work
+                )
+            end
+        end
+    end
+    
+    -- Render player at its WORLD coordinates (not offset)
+    if self.player then
+        self.player:render()
     end
 end
 

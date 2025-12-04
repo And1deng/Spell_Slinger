@@ -4,6 +4,7 @@ push = require 'lib/push'
 -- classes
 require 'src/StateMachine'
 require 'src/constants'
+require 'src/Entity'
 require 'src/Player'
 require 'src/Util'
 require 'src/BackgroundParallax'
@@ -14,6 +15,17 @@ require 'src/game_states/MainMenuState'
 require 'src/game_states/PlayState'
 require 'src/game_states/GameOverState'
 require 'src/world_states/Room'
+
+-- entity states
+require 'src/entity_states/EntityIdleState'
+require 'src/entity_states/EntityWalkState'
+
+-- player states
+require 'src/entity_states/player/PlayerIdleState'
+require 'src/entity_states/player/PlayerWalkState'
+
+-- data
+require 'src/entity_definitions'
 
 -- resources
 gTextures = {
@@ -28,5 +40,6 @@ gFrames = {
 gFonts = { 
     ['TitleFont'] = love.graphics.newFont('fonts/alagard.ttf', 35),
     ['DefaultFont'] = love.graphics.newFont('fonts/OldeTome.ttf', 16), 
+    ['DebugFont'] = love.graphics.newFont('fonts/ARIAL.ttf', 16), 
 }
 gSounds = {}

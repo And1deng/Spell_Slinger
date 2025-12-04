@@ -8,17 +8,24 @@ function StateMachine:init(states)
 		enter = function() end,
 		exit = function() end
 	}
-	self.states = states or {} -- [name] -> [function that returns states]
-	self.current = self.empty
+    self.stateConstructors = states or {}
+    self.stateInstances = {}  -- Cache for state instances
+    self.current = self.empty
 end
 
 function StateMachine:change(stateName, enterParams)
-	assert(self.states[stateName])
-	self.current:exit()
-	self.current = self.states[stateName]()
-	self.current:enter(enterParams)
+    assert(self.stateConstructors[stateName])
+    
+    self.current:exit()
+    
+    -- Get or create state instance
+    if not self.stateInstances[stateName] then
+        self.stateInstances[stateName] = self.stateConstructors[stateName]()
+    end
+    
+    self.current = self.stateInstances[stateName]
+    self.current:enter(enterParams)
 end
-
 function StateMachine:update(dt)
 	self.current:update(dt)
 end
