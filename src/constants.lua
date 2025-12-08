@@ -19,10 +19,14 @@ MAP_RENDER_OFFSET_Y = (VIRTUAL_HEIGHT - (MAP_HEIGHT * TILE_SIZE)) / 2
 --Tile IDs--
 TILE_IDS = {
 
-    -- Grass floor tiles
+    -- Dark Grass floor tiles
     DARK_GRASS_FLOORS = {
         sheet = 'tiles',
         variants = {1, 8, 15}
+    },
+    DIRT_FILLER = {
+        sheet = 'filler',
+        variants = {1}
     },
 
     -- Wall corner tiles
@@ -66,4 +70,37 @@ TILE_IDS = {
         sheet = 'walls',
         variants = {10}
     }
+}
+
+TILE_IDS.WALL = {
+    sheet = 'walls',
+    variants = {
+        TOP_LEFT_CORNER     = 15,
+        TOP_EDGE            = 14,
+        TOP_RIGHT_CORNER    = 13,
+
+        LEFT_EDGE           = 8,
+        CENTER_FILL         = 9,
+        RIGHT_EDGE          = 10,
+
+        BOTTOM_LEFT_CORNER  = 5,
+        BOTTOM_EDGE         = 4,
+        BOTTOM_RIGHT_CORNER = 3
+    }
+}
+
+WALL_MASK_MAP = {
+    [1+4]   = "TOP_LEFT_CORNER",      -- Up + Left
+    [1]     = "TOP_EDGE",             -- Up only
+    [1+8]   = "TOP_RIGHT_CORNER",     -- Up + Right
+
+    [4]     = "LEFT_EDGE",            -- Left only
+    [8]     = "RIGHT_EDGE",           -- Right only
+
+    [2+4]   = "BOTTOM_LEFT_CORNER",   -- Down + Left
+    [2]     = "BOTTOM_EDGE",          -- Down only
+    [2+8]   = "BOTTOM_RIGHT_CORNER",  -- Down + Right
+
+    -- Surrounded on all 4 sides → inner fill
+    [1+2+4+8] = "CENTER_FILL",
 }

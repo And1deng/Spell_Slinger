@@ -1,6 +1,6 @@
 ENTITY_DEFS = {
     ['player'] = {
-        walkSpeed = 50
+        walkSpeed = 100
         --animations = PLAYER_ANIMATIONS
     }
 }
