@@ -9,12 +9,14 @@ function Room:init(player)
     self.tiles = {}
 
     -- assigned externally
+    self.entities = {}
+    self.dummy = dummy
+    self:generateEntities()
+
     self.player = player
 end
 
----------------------------------------------------------
 -- Generate a circular overworld
----------------------------------------------------------
 function Room:generateCircularOverworld()
     local cx = self.width / 2
     local cy = self.height / 2
@@ -157,18 +159,39 @@ function Room:generateWalls()
     end
 end
 
----------------------------------------------------------
+function Room:generateEntities()
+    local dummy = Entity {
+        walkSpeed = ENTITY_DEFS['dummy'].walkSpeed or 20,
+        animations = ENTITY_DEFS['dummy'].animations,
+        x = 790,
+        y = 790,
+        width = 16,
+        height = 16,
+        health = 1
+    }
+    table.insert(self.entities, dummy)
+
+    dummy.stateMachine = StateMachine {
+        ['walk'] = function() return EntityWalkState(dummy, self) end,
+        ['idle'] = function() return EntityIdleState(dummy, self) end
+    }
+
+    dummy:changeState('idle')
+end
+
 -- Update room + player
----------------------------------------------------------
 function Room:update(dt)
+    for _, entity in ipairs(self.entities) do
+        entity.stateMachine:update(dt)
+        entity.currentAnimation:update(dt)
+    end
+
     if self.player then
         self.player:update(dt)
     end
 end
 
----------------------------------------------------------
 -- Render all tiles + player
----------------------------------------------------------
 function Room:render(xOffset, yOffset, tileSize)
     xOffset = xOffset or 0
     yOffset = yOffset or 0
@@ -213,7 +236,15 @@ function Room:render(xOffset, yOffset, tileSize)
             end
         end
     end
-    
+
+    for _, entity in ipairs(self.entities) do
+        entity:render()
+
+        -- OPTIONAL DEBUG HITBOX OUTLINE
+        love.graphics.setColor(1, 0, 0, 1)
+        love.graphics.rectangle("line", entity.x, entity.y, entity.width, entity.height)
+        love.graphics.setColor(1, 1, 1, 1)
+    end
     -- Render player on top of everything
     if self.player then
         self.player:render()

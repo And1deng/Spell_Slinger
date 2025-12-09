@@ -1,4 +1,4 @@
-Entity = Class()
+Entity = Class{}
 
 function Entity:init(def)
     -- top-down direction
@@ -63,7 +63,6 @@ function Entity:goInvulnerable(duration)
 end
 
 function Entity:changeState(name)
-    print("Changing state from " .. tostring(self.stateMachine.current.__classname) .. " to " .. name)
     self.stateMachine:change(name)
 end
 
@@ -72,7 +71,6 @@ function Entity:changeAnimation(name)
 end
 
 function Entity:update(dt)
-    -- invulnerability timing
     if self.invulnerable then
         self.flashTimer = self.flashTimer + dt
         self.invulnerableTimer = self.invulnerableTimer + dt
@@ -95,10 +93,17 @@ function Entity:update(dt)
     end
 end
 
-function Entity:render(adjX, adjY)
-    love.graphics.setColor(1, 0, 1, 1)
-    love.graphics.rectangle('line', self.x, self.y, self.width, self.height)
-    love.graphics.setColor(1, 1, 1, 1)
+function Entity:processAI(params, dt)
+    self.stateMachine:processAI(params, dt)
 end
+
+function Entity:render()
+    local anim = self.currentAnimation
+    local texture = gTextures[anim.texture]
+    local quad = gFrames[anim.texture][anim:getCurrentFrame()]
+
+    love.graphics.draw(texture, quad, math.floor(self.x), math.floor(self.y))
+end
+
 
 return Entity

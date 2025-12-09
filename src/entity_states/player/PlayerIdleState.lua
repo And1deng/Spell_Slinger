@@ -3,7 +3,10 @@ PlayerIdleState = Class{__includes = EntityIdleState}
 
 
 function PlayerIdleState:enter(player)
-    --place sprite render offsets here
+    self.entity.offsetY = 24
+    self.entity.offsetX = 40
+
+    self.entity:changeAnimation('idle-' .. self.entity.direction)
 end
 
 function PlayerIdleState:update(dt)
