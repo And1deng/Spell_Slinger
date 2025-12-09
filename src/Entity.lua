@@ -19,6 +19,8 @@ function Entity:init(def)
 
     -- movement
     self.walkSpeed = def.walkSpeed or 30
+    self.dx = 0
+    self.dy = 0
 
     -- health
     self.health = def.health or 1
