@@ -3,6 +3,7 @@ Entity = Class{}
 function Entity:init(def)
     -- top-down direction
     self.direction = 'down'
+    self.room = def.room or nil
 
     -- animations
     self.animations = self:createAnimations(def.animations or {})

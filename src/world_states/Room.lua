@@ -10,6 +10,7 @@ function Room:init(player)
 
     -- assigned externally
     self.entities = {}
+    self.projectiles = {}
     self.dummy = dummy
     self:generateEntities()
 
@@ -161,6 +162,7 @@ end
 
 function Room:generateEntities()
     local dummy = Entity {
+        room = self,
         walkSpeed = ENTITY_DEFS['dummy'].walkSpeed or 20,
         animations = ENTITY_DEFS['dummy'].animations,
         x = 790,
@@ -184,6 +186,15 @@ function Room:update(dt)
     for _, entity in ipairs(self.entities) do
         entity.stateMachine:update(dt)
         entity.currentAnimation:update(dt)
+    end
+
+    for i = #self.projectiles, 1, -1 do
+        local p = self.projectiles[i]
+        p:update(dt)
+
+        if not p.active then
+            table.remove(self.projectiles, i)
+        end
     end
 
     if self.player then
@@ -245,10 +256,20 @@ function Room:render(xOffset, yOffset, tileSize)
         love.graphics.rectangle("line", entity.x, entity.y, entity.width, entity.height)
         love.graphics.setColor(1, 1, 1, 1)
     end
-    -- Render player on top of everything
-    if self.player then
-        self.player:render()
+
+    for _, p in ipairs(self.projectiles) do
+        p:render()
     end
+
+    -- Render player on top of everything (use state's render if available)
+    if self.player then
+        if self.player.stateMachine and self.player.stateMachine.render then
+            self.player.stateMachine:render()
+        else
+            self.player:render()
+        end
+    end
+
 end
 
 return Room

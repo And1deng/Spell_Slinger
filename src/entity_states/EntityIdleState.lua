@@ -30,14 +30,4 @@ function EntityIdleState:render()
     local anim = self.entity.currentAnimation
     love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
         math.floor(self.entity.x - self.entity.offsetX), math.floor(self.entity.y - self.entity.offsetY))
-    
-        love.graphics.setColor(1, 0, 0, 1) -- red box
-    love.graphics.rectangle(
-        'line',
-        math.floor(self.entity.x),
-        math.floor(self.entity.y),
-        self.entity.width,
-        self.entity.height
-    )
-    love.graphics.setColor(1, 1, 1, 1)
 end

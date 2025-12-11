@@ -16,13 +16,15 @@ function PlayState:init()
         height = 16,
     }
 
+
     self.room = Room(self.player)
+    self.player.room = self.room
     self.room:generateCircularOverworld()
 
     self.player.stateMachine = StateMachine {
         ['idle'] = function() return PlayerIdleState(self.player) end,
         ['walk'] = function() return PlayerWalkState(self.player) end,
-        ['dodge'] = function() return PlayerDodgeState(self.player) end
+        ['dodge'] = function() return PlayerDodgeState(self.player) end,
     }
     self.player:changeState('idle')
 end
@@ -67,5 +69,8 @@ function PlayState:render()
 
     local screenX = self.player.x - self.camX
     local screenY = self.player.y - self.camY
-    love.graphics.print("Screen Pos: " .. math.floor(screenX) .. ", " .. math.floor(screenY), 10, 50)
+    -- draw player UI overlay (cast buffer) in screen space
+    if self.player and self.player.renderCast then
+        self.player:renderCast()
+    end
 end

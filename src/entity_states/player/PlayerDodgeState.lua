@@ -26,10 +26,10 @@ function PlayerDodgeState:enter(params)
         dx = params.dx
         dy = params.dy
     else
-        if love.keyboard.isDown('left')  then dx = dx - 1 end
-        if love.keyboard.isDown('right') then dx = dx + 1 end
-        if love.keyboard.isDown('up')    then dy = dy - 1 end
-        if love.keyboard.isDown('down')  then dy = dy + 1 end
+        if love.keyboard.isDown(MOVE_LEFT)  then dx = dx - 1 end
+        if love.keyboard.isDown(MOVE_RIGHT) then dx = dx + 1 end
+        if love.keyboard.isDown(MOVE_UP)    then dy = dy - 1 end
+        if love.keyboard.isDown(MOVE_DOWN)  then dy = dy + 1 end
         if dx == 0 and dy == 0 then
             if self.entity.direction == 'up' then dy = -1
             elseif self.entity.direction == 'down' then dy = 1
@@ -77,10 +77,10 @@ function PlayerDodgeState:update(dt)
     if self.dodgeTimer >= self.dodgeDuration then
         self.entity.invulnerable = false
 
-        if love.keyboard.isDown('up') or
-           love.keyboard.isDown('down') or
-           love.keyboard.isDown('left') or
-           love.keyboard.isDown('right') then
+        if love.keyboard.isDown(MOVE_UP) or
+            love.keyboard.isDown(MOVE_DOWN) or
+            love.keyboard.isDown(MOVE_LEFT) or
+            love.keyboard.isDown(MOVE_RIGHT) then
             self.entity:changeState('walk')
         else
             self.entity:changeState('idle')

@@ -14,16 +14,16 @@ end
 function PlayerIdleState:update(dt)
     self.dx, self.dy = 0, 0
     
-    if love.keyboard.isDown('up') or
-       love.keyboard.isDown('down') or
-       love.keyboard.isDown('left') or
-       love.keyboard.isDown('right') then
+    if love.keyboard.isDown(MOVE_UP) or
+        love.keyboard.isDown(MOVE_DOWN) or
+        love.keyboard.isDown(MOVE_LEFT) or
+        love.keyboard.isDown(MOVE_RIGHT) then
         self.entity:changeState('walk')
         return
     end
 
     -- dodge from idle: compute vector and pass as params to dodge state
-    if love.keyboard.wasPressed('space') then
+    if love.keyboard.wasPressed(DODGE) then
         local dx, dy = 0, 0
         if self.entity.direction == 'up' then dy = -1
         elseif self.entity.direction == 'down' then dy = 1

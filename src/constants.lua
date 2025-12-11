@@ -6,6 +6,21 @@ VIRTUAL_HEIGHT = 216
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
+--user inputs--
+MOVE_LEFT = 'a'
+MOVE_RIGHT = 'd'
+MOVE_UP = 'w'
+MOVE_DOWN = 's'
+
+DODGE = 'space'
+
+INPUT_UP = 'up'
+INPUT_DOWN = 'down'
+INPUT_LEFT = 'left'
+INPUT_RIGHT = 'right'
+
+
+
 --Tile Size--
 TILE_SIZE = 16
 
