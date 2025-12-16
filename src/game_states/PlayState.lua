@@ -8,7 +8,7 @@ function PlayState:init()
     local mapCenterY = (MAP_HEIGHT * TILE_SIZE) / 2
 
     self.player = Player {
-        walkSpeed = ENTITY_DEFS['player'].walkSpeed,
+        walk_speed = ENTITY_DEFS['player'].walk_speed,
         animations = ENTITY_DEFS['player'].animations,
         x = mapCenterX - 8,
         y = mapCenterY - 8,
@@ -21,12 +21,12 @@ function PlayState:init()
     self.player.room = self.room
     self.room:generateCircularOverworld()
 
-    self.player.stateMachine = StateMachine {
+    self.player.state_machine = StateMachine {
         ['idle'] = function() return PlayerIdleState(self.player) end,
         ['walk'] = function() return PlayerWalkState(self.player) end,
         ['dodge'] = function() return PlayerDodgeState(self.player) end,
     }
-    self.player:changeState('idle')
+    self.player:change_state('idle')
 end
 
 function PlayState:updateCamera()
@@ -70,7 +70,7 @@ function PlayState:render()
     local screenX = self.player.x - self.camX
     local screenY = self.player.y - self.camY
     -- draw player UI overlay (cast buffer) in screen space
-    if self.player and self.player.renderCast then
-        self.player:renderCast()
+    if self.player and self.player.render_cast then
+        self.player:render_cast()
     end
 end

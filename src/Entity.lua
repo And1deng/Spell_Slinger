@@ -6,7 +6,7 @@ function Entity:init(def)
     self.room = def.room or nil
 
     -- animations
-    self.animations = self:createAnimations(def.animations or {})
+    self.animations = self:create_animations(def.animations or {})
 
     -- position & size
     self.x = def.x or 0
@@ -14,28 +14,29 @@ function Entity:init(def)
     self.width = def.width or 16
     self.height = def.height or 16
 
-    -- drawing offsets
-    self.offsetX = def.offsetX or 0
-    self.offsetY = def.offsetY or 0
+    -- drawing offsets (prefer snake_case, accept camelCase for compatibility)
+    self.offset_x = def.offset_x or def.offsetX or 0
+    self.offset_y = def.offset_y or def.offsetY or 0
 
     -- movement
-    self.walkSpeed = def.walkSpeed or 30
+    self.walk_speed = def.walk_speed or 30
     self.dx = 0
     self.dy = 0
 
     -- health
-    self.health = def.health or 1
+    self.max_health = def.max_health or 1
+    self.health = def.health or self.max_health
 
     -- invulnerability
     self.invulnerable = false
-    self.invulnerableDuration = 0
-    self.invulnerableTimer = 0
-    self.flashTimer = 0
+    self.invulnerable_duration = 0
+    self.invulnerable_timer = 0
+    self.flash_timer = 0
 
     self.dead = false
 end
 
-function Entity:createAnimations(animations)
+function Entity:create_animations(animations)
     local anims = {}
 
     for k, def in pairs(animations) do
@@ -60,52 +61,52 @@ function Entity:damage(dmg)
     self.health = self.health - dmg
 end
 
-function Entity:goInvulnerable(duration)
+function Entity:go_invulnerable(duration)
     self.invulnerable = true
-    self.invulnerableDuration = duration
+    self.invulnerable_duration = duration
 end
 
-function Entity:changeState(name)
-    self.stateMachine:change(name)
+function Entity:change_state(name)
+    self.state_machine:change(name)
 end
 
-function Entity:changeAnimation(name)
-    self.currentAnimation = self.animations[name]
+function Entity:change_animation(name)
+    self.current_animation = self.animations[name]
 end
 
 function Entity:update(dt)
     if self.invulnerable then
-        self.flashTimer = self.flashTimer + dt
-        self.invulnerableTimer = self.invulnerableTimer + dt
+        self.flash_timer = self.flash_timer + dt
+        self.invulnerable_timer = self.invulnerable_timer + dt
 
-        if self.invulnerableTimer > self.invulnerableDuration then
+        if self.invulnerable_timer > self.invulnerable_duration then
             self.invulnerable = false
-            self.invulnerableTimer = 0
-            self.invulnerableDuration = 0
-            self.flashTimer = 0
+            self.invulnerable_timer = 0
+            self.invulnerable_duration = 0
+            self.flash_timer = 0
         end
     end
 
     -- update animation + state
-    if self.currentAnimation then
-        self.currentAnimation:update(dt)
+    if self.current_animation then
+        self.current_animation:update(dt)
     end
 
-    if self.stateMachine then
-        self.stateMachine:update(dt)
+    if self.state_machine then
+        self.state_machine:update(dt)
     end
 end
 
-function Entity:processAI(params, dt)
-    self.stateMachine:processAI(params, dt)
+function Entity:process_ai(params, dt)
+    self.state_machine:process_ai(params, dt)
 end
 
 function Entity:render()
-    local anim = self.currentAnimation
+    local anim = self.current_animation
     local texture = gTextures[anim.texture]
     local quad = gFrames[anim.texture][anim:getCurrentFrame()]
 
-    love.graphics.draw(texture, quad, math.floor(self.x), math.floor(self.y))
+    love.graphics.draw(texture, quad, math.floor(self.x - (self.offset_x or 0)), math.floor(self.y - (self.offset_y or 0)))
 end
 
 

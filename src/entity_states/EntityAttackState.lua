@@ -7,7 +7,7 @@ end
 
 function EntityAttackState:enter()
     self.timer = 0
-    self.entity:changeAnimation(self.attack.animation)
+    self.entity:change_animation(self.attack.animation)
 end
 
 function EntityAttackState:update(dt)
@@ -15,12 +15,12 @@ function EntityAttackState:update(dt)
 
     if self.timer >= self.attack.windup and not self.fired then
         self.fired = true
-        if self.attack.onFire then
-            self.attack.onFire(self.entity)
+        if self.attack.on_fire then
+            self.attack.on_fire(self.entity)
         end
     end
 
-    if self.timer >= self.attack.totalDuration then
-        self.entity.stateMachine:change('idle')
+    if self.timer >= self.attack.total_duration then
+        self.entity.state_machine:change('idle')
     end
 end

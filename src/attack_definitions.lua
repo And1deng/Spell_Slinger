@@ -7,20 +7,59 @@ ATTACK_DEFS = {
             texture = 'fireball'
         },
         windup = 0.3,
-        totalDuration = 1.0,
-        onFire = function(entity)
-            local room = entity.room
-            local projectile = Projectile({
-                texture = 'fireball',
-                x = entity.x + entity.width / 2,
-                y = entity.y + entity.height / 2,
-                speed = 200,
-                direction = entity.direction,
-                damage = 10,
-                lifetime = 1
-            })
+        total_duration = 1.0,
 
-            table.insert(room.projectiles, projectile)
+        on_fire = function(entity)
+            local room = entity.room
+            if not room then return end
+
+            local ndx, ndy = nil, nil
+
+            -- Try to get nearest target vector
+            if entity.get_nearest_target_vector then
+                ndx, ndy = entity:get_nearest_target_vector()
+            end
+
+            -- Spawn position (center of entity)
+            local sx = entity.x + (entity.width or 0) / 2
+            local sy = entity.y + (entity.height or 0) / 2
+
+            -- Case 1: Valid target vector
+            if ndx ~= nil and ndy ~= nil then
+                table.insert(room.projectiles, Projectile({
+                    texture = 'fireball',
+                    x = sx,
+                    y = sy,
+                    width = 8,
+                    height = 8,
+                    dx = ndx,
+                    dy = ndy,
+                    speed = 200,
+                    damage = 1,
+                    lifetime = 1
+                }))
+                return
+            end
+
+            -- Case 2: No targets → fire in facing direction
+            local dir = entity.direction or 'down'
+            local v = DIRECTION_VECTORS[dir]
+
+            -- If direction somehow invalid, cancel firing
+            if not v then return end
+
+            table.insert(room.projectiles, Projectile({
+                texture = 'fireball',
+                x = sx,
+                y = sy,
+                width = 8,
+                height = 8,
+                dx = v[1],
+                dy = v[2],
+                speed = 200,
+                damage = 1,
+                lifetime = 1
+            }))
         end
     }
 }

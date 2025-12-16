@@ -6,6 +6,20 @@ VIRTUAL_HEIGHT = 216
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
+--directions
+DIRECTION_VECTORS = {
+    up    = {0, -1},
+    down  = {0, 1},
+    left  = {-1, 0},
+    right = {1, 0},
+
+    ['up-left']    = {-0.7071, -0.7071},
+    ['up-right']   = {0.7071, -0.7071},
+    ['down-left']  = {-0.7071, 0.7071},
+    ['down-right'] = {0.7071, 0.7071}
+}
+
+
 --user inputs--
 MOVE_LEFT = 'a'
 MOVE_RIGHT = 'd'

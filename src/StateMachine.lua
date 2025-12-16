@@ -4,7 +4,7 @@ function StateMachine:init(states)
 	self.empty = {
 		render = function() end,
 		update = function() end,
-		processAI = function() end,
+		process_ai = function() end,
 		enter = function() end,
 		exit = function() end
 	}
@@ -34,6 +34,6 @@ function StateMachine:render()
 	self.current:render()
 end
 
-function StateMachine:processAI(params, dt)
-	self.current:processAI(params, dt)
+function StateMachine:process_ai(params, dt)
+	self.current:process_ai(params, dt)
 end

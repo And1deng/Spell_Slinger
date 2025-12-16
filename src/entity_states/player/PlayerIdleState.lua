@@ -4,11 +4,11 @@ PlayerIdleState = Class{__includes = EntityIdleState}
 function PlayerIdleState:init(player)
     self.entity = player
 
-    self.entity.offsetY = 24
-    self.entity.offsetX = 40
+    self.entity.offset_y = 24
+    self.entity.offset_x = 40
 
     -- set idle animation based on facing direction
-    self.entity:changeAnimation('idle-' .. self.entity.direction)
+    self.entity:change_animation('idle-' .. self.entity.direction)
 end
 
 function PlayerIdleState:update(dt)
@@ -18,7 +18,7 @@ function PlayerIdleState:update(dt)
         love.keyboard.isDown(MOVE_DOWN) or
         love.keyboard.isDown(MOVE_LEFT) or
         love.keyboard.isDown(MOVE_RIGHT) then
-        self.entity:changeState('walk')
+        self.entity:change_state('walk')
         return
     end
 
@@ -31,6 +31,6 @@ function PlayerIdleState:update(dt)
         elseif self.entity.direction == 'right' then dx = 1
         end
 
-        self.entity:changeState('dodge', { dx = dx, dy = dy })
+        self.entity:change_state('dodge', { dx = dx, dy = dy })
     end
 end

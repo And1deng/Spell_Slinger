@@ -4,8 +4,8 @@ PlayerDodgeState = Class{__includes = EntityWalkState}
 function PlayerDodgeState:init(player)
     self.entity = player
 
-    self.entity.offsetY = 24
-    self.entity.offsetX = 40
+    self.entity.offset_y = 24
+    self.entity.offset_x = 40
 
     -- Dodge movement config
     self.dodgeDistance = 50
@@ -61,15 +61,15 @@ function PlayerDodgeState:update(dt)
     -- pick animation based on direction
     if math.abs(self.dx) > math.abs(self.dy) then
         if self.dx < 0 then
-            self.entity:changeAnimation('walk-left')
+            self.entity:change_animation('walk-left')
         else
-            self.entity:changeAnimation('walk-right')
+            self.entity:change_animation('walk-right')
         end
     else
         if self.dy < 0 then
-            self.entity:changeAnimation('walk-up')
+            self.entity:change_animation('walk-up')
         else
-            self.entity:changeAnimation('walk-down')
+            self.entity:change_animation('walk-down')
         end
     end
 
@@ -81,9 +81,9 @@ function PlayerDodgeState:update(dt)
             love.keyboard.isDown(MOVE_DOWN) or
             love.keyboard.isDown(MOVE_LEFT) or
             love.keyboard.isDown(MOVE_RIGHT) then
-            self.entity:changeState('walk')
+            self.entity:change_state('walk')
         else
-            self.entity:changeState('idle')
+            self.entity:change_state('idle')
         end
     end
 end

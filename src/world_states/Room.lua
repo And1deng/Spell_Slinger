@@ -163,40 +163,61 @@ end
 function Room:generateEntities()
     local dummy = Entity {
         room = self,
-        walkSpeed = ENTITY_DEFS['dummy'].walkSpeed or 20,
+        max_health = ENTITY_DEFS['dummy'].max_health,
+        walk_speed = ENTITY_DEFS['dummy'].walk_speed or 20,
         animations = ENTITY_DEFS['dummy'].animations,
         x = 790,
         y = 790,
         width = 16,
         height = 16,
-        health = 1
     }
     table.insert(self.entities, dummy)
 
-    dummy.stateMachine = StateMachine {
+    dummy.state_machine = StateMachine {
         ['walk'] = function() return EntityWalkState(dummy, self) end,
         ['idle'] = function() return EntityIdleState(dummy, self) end
     }
 
-    dummy:changeState('idle')
+    dummy:change_state('idle')
 end
 
 -- Update room + player
 function Room:update(dt)
+    --Entity updates
     for _, entity in ipairs(self.entities) do
-        entity.stateMachine:update(dt)
-        entity.currentAnimation:update(dt)
+        entity.state_machine:update(dt)
+        entity.current_animation:update(dt)
     end
 
+    --Check for entity deaths
+    for i = #self.entities, 1, -1 do
+        local entity = self.entities[i]
+        if entity.health <= 0 then
+            entity.dead = true
+            table.remove(self.entities, i)
+        end
+    end
+
+    --Update projectiles
     for i = #self.projectiles, 1, -1 do
         local p = self.projectiles[i]
         p:update(dt)
 
         if not p.active then
             table.remove(self.projectiles, i)
+        else
+            -- Check collision with enemies
+            for _, entity in ipairs(self.entities) do
+                if entity:collides(p) then
+                    entity:damage(p.damage)
+                    p.active = false
+                    break
+                end
+            end
         end
     end
 
+    --Update player
     if self.player then
         self.player:update(dt)
     end
@@ -251,10 +272,15 @@ function Room:render(xOffset, yOffset, tileSize)
     for _, entity in ipairs(self.entities) do
         entity:render()
 
-        -- OPTIONAL DEBUG HITBOX OUTLINE
         love.graphics.setColor(1, 0, 0, 1)
         love.graphics.rectangle("line", entity.x, entity.y, entity.width, entity.height)
         love.graphics.setColor(1, 1, 1, 1)
+
+        if entity.health ~= nil and entity.health > 0 then
+            love.graphics.setColor(0, 1, 0, 1)
+            love.graphics.rectangle("fill", entity.x, entity.y - 5, (entity.health / entity.max_health) * entity.width, 3)
+            love.graphics.setColor(1, 1, 1, 1)
+        end
     end
 
     for _, p in ipairs(self.projectiles) do
@@ -263,8 +289,8 @@ function Room:render(xOffset, yOffset, tileSize)
 
     -- Render player on top of everything (use state's render if available)
     if self.player then
-        if self.player.stateMachine and self.player.stateMachine.render then
-            self.player.stateMachine:render()
+        if self.player.state_machine and self.player.state_machine.render then
+            self.player.state_machine:render()
         else
             self.player:render()
         end

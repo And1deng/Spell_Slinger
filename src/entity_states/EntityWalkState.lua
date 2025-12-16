@@ -16,7 +16,7 @@ function EntityWalkState:update(dt)
     self.bumped = false
     
     if self.entity.direction then
-        local speed = self.entity.walkSpeed or 30
+        local speed = self.entity.walk_speed
         
         local newX, newY = self.entity.x, self.entity.y
         
@@ -53,23 +53,23 @@ function EntityWalkState:update(dt)
     end
 end
 
-function EntityWalkState:processAI(params, dt)
+function EntityWalkState:process_ai(params, dt)
     local room = params and params.room or self.room
     local directions = {'left', 'right', 'up', 'down'}
     
     if self.moveDuration == 0 or self.bumped then
         self.moveDuration = math.random(5)
         self.entity.direction = directions[math.random(#directions)]
-        self.entity:changeAnimation('walk-' .. tostring(self.entity.direction))
+        self.entity:change_animation('walk-' .. tostring(self.entity.direction))
     elseif self.movementTimer > self.moveDuration then
         self.movementTimer = 0
         
         if math.random(3) == 1 then
-            self.entity:changeState('idle')
+            self.entity:change_state('idle')
         else
             self.moveDuration = math.random(5)
             self.entity.direction = directions[math.random(#directions)]
-            self.entity:changeAnimation('walk-' .. tostring(self.entity.direction))
+            self.entity:change_animation('walk-' .. tostring(self.entity.direction))
         end
     end
     
@@ -77,6 +77,6 @@ function EntityWalkState:processAI(params, dt)
 end
 
 function EntityWalkState:render() 
-    local anim = self.entity.currentAnimation
-    love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()], math.floor(self.entity.x - self.entity.offsetX), math.floor(self.entity.y - self.entity.offsetY))
+    local anim = self.entity.current_animation
+    love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()], math.floor(self.entity.x - (self.entity.offset_x or 0)), math.floor(self.entity.y - (self.entity.offset_y or 0)))
 end

@@ -4,10 +4,10 @@ function Player:init(def)
     Entity.init(self, def)
 
     -- Casting system
-    self.castBuffer = {}
-    self.castTimer = 0
-    self.castTimeout = 2.0
-    self.maxCastInputs = 3
+    self.cast_buffer = {}
+    self.cast_timer = 0
+    self.cast_timeout = 2.0
+    self.max_cast_inputs = 3
 end
 
 function Player:update(dt)
@@ -15,15 +15,15 @@ function Player:update(dt)
     Entity.update(self, dt)
 
     -- Casting update (runs independently of movement states)
-    self:updateCast(dt)
+    self:update_cast(dt)
 end
 
-function Player:updateCast(dt)
+function Player:update_cast(dt)
     -- Advance timer and clear cast if stale
-    self.castTimer = self.castTimer + dt
-    if self.castTimer > self.castTimeout then
-        self.castBuffer = {}
-        self.castTimer = 0
+    self.cast_timer = self.cast_timer + dt
+    if self.cast_timer > self.cast_timeout then
+        self.cast_buffer = {}
+        self.cast_timer = 0
     end
 
     -- Handle new directional input
@@ -35,36 +35,35 @@ function Player:updateCast(dt)
     end
 
     if pressed then
-        table.insert(self.castBuffer, pressed)
-        self.castTimer = 0   -- reset since an input was added
+        table.insert(self.cast_buffer, pressed)
+        self.cast_timer = 0   -- reset since an input was added
     end
 
     -- Check for max inputs → try cast spell
-    if #self.castBuffer == self.maxCastInputs then
-        local spell = self:matchSpell()
+    if #self.cast_buffer == self.max_cast_inputs then
+        local spell = self:match_spell()
         
         if spell then
-            -- Cast!
-            if spell.onFire then
-                spell.onFire(self)
+            if spell.on_fire then
+                spell.on_fire(self)
             end
             -- Reset buffer after cast
-            self.castBuffer = {}
-            self.castTimer = 0
+            self.cast_buffer = {}
+            self.cast_timer = 0
         else
             -- Slide buffer window forward (like fighting game input buffer)
-            table.remove(self.castBuffer, 1)
+            table.remove(self.cast_buffer, 1)
         end
     end
 end
 
 -- Compare buffer with ATTACK_DEFS
-function Player:matchSpell()
+function Player:match_spell()
     for spellName, spell in pairs(ATTACK_DEFS) do
-        if #spell.input == self.maxCastInputs then
-            if  self.castBuffer[1] == spell.input[1] and
-                self.castBuffer[2] == spell.input[2] and
-                self.castBuffer[3] == spell.input[3] then
+        if #spell.input == self.max_cast_inputs then
+            if self.cast_buffer[1] == spell.input[1] and
+               self.cast_buffer[2] == spell.input[2] and
+               self.cast_buffer[3] == spell.input[3] then
                 return spell
             end
         end
@@ -75,18 +74,18 @@ end
 -- Render player normally + cast overlay UI
 function Player:render()
     Entity.render(self)
-    self:renderCast()
+    self:render_cast()
 end
 
-function Player:renderCast()
-    if #self.castBuffer == 0 then
+function Player:render_cast()
+    if #self.cast_buffer == 0 then
         return
     end
 
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.setFont(gFonts['DefaultFont'])
 
-    local text = table.concat(self.castBuffer, " ")
+    local text = table.concat(self.cast_buffer, " ")
 
     -- Draw at the bottom of the screen
     love.graphics.printf(
@@ -96,4 +95,35 @@ function Player:renderCast()
         VIRTUAL_WIDTH,
         "center"
     )
+end
+
+-- Return normalized direction (dx, dy) toward nearest enemy, or nil if none found.
+-- Need to check for enemy on screen to avoid targeting offscreen enemies.
+function Player:get_nearest_target_vector(maxRange)
+    if not self.room then return nil end
+    local nearest = nil
+    local nearest_dist = math.huge
+    local center_x = self.x + (self.width or 0) / 2
+    local center_y = self.y + (self.height or 0) / 2
+
+    for _, e in ipairs(self.room.entities) do
+        if e ~= self and not e.dead then
+            local target_x = e.x + (e.width or 0) / 2
+            local target_y = e.y + (e.height or 0) / 2
+            local dx = target_x - center_x
+            local dy = target_y - center_y
+            local d = math.sqrt(dx * dx + dy * dy)
+            if (not maxRange or d <= maxRange) and d < nearest_dist then
+                nearest_dist = d
+                nearest = {dx = dx, dy = dy, target = e}
+            end
+        end
+    end
+
+    if not nearest then return nil end
+
+    local len = math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy)
+    if len == 0 then return nil end
+
+    return nearest.dx / len, nearest.dy / len, nearest.target
 end

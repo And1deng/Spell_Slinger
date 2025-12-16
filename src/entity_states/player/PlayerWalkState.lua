@@ -2,8 +2,8 @@ PlayerWalkState = Class{__includes = EntityWalkState}
 
 function PlayerWalkState:init(player)
     self.entity = player
-    self.entity.offsetY = 24
-    self.entity.offsetX = 40
+    self.entity.offset_y = 24
+    self.entity.offset_x = 40
 end
 
 function PlayerWalkState:update(dt)
@@ -28,13 +28,13 @@ function PlayerWalkState:update(dt)
             elseif self.entity.direction == 'right' then dx = 1
             end
         end
-        self.entity:changeState('dodge', { dx, dy})
+        self.entity:change_state('dodge', { dx, dy})
         return
     end
 
     -- if no input → idle
     if len == 0 then
-        self.entity:changeState('idle')
+        self.entity:change_state('idle')
         return
     end
 
@@ -43,25 +43,25 @@ function PlayerWalkState:update(dt)
     dy = dy / len
 
     -- apply movement
-    self.entity.x = self.entity.x + dx * self.entity.walkSpeed * dt
-    self.entity.y = self.entity.y + dy * self.entity.walkSpeed * dt
+    self.entity.x = self.entity.x + dx * self.entity.walk_speed * dt
+    self.entity.y = self.entity.y + dy * self.entity.walk_speed * dt
 
     -- choose animation based on dominant axis
     if math.abs(dx) > math.abs(dy) then
         if dx < 0 then
             self.entity.direction = 'left'
-            self.entity:changeAnimation('walk-left')
+            self.entity:change_animation('walk-left')
         else
             self.entity.direction = 'right'
-            self.entity:changeAnimation('walk-right')
+            self.entity:change_animation('walk-right')
         end
     else
         if dy < 0 then
             self.entity.direction = 'up'
-            self.entity:changeAnimation('walk-up')
+            self.entity:change_animation('walk-up')
         else
             self.entity.direction = 'down'
-            self.entity:changeAnimation('walk-down')
+            self.entity:change_animation('walk-down')
         end
     end
 end

@@ -14,6 +14,7 @@ require 'src/BackgroundParallax'
 require 'src/perlin'
 require 'src/Animation'
 require 'src/Projectile'
+require 'src/Hitbox'
 
 -- game states
 require 'src/game_states/BaseState'

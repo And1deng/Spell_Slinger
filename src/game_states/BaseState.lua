@@ -21,5 +21,5 @@ function BaseState:render()
 end
 
 -- optional separate AI processing
-function BaseState:processAI(params, dt)
+function BaseState:process_ai(params, dt)
 end
