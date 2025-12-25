@@ -74,7 +74,6 @@ end
 -- Render player normally + cast overlay UI
 function Player:render()
     Entity.render(self)
-    self:render_cast()
 end
 
 function Player:render_cast()

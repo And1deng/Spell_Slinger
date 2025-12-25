@@ -4,7 +4,6 @@ function StateMachine:init(states)
 	self.empty = {
 		render = function() end,
 		update = function() end,
-		process_ai = function() end,
 		enter = function() end,
 		exit = function() end
 	}
@@ -28,12 +27,4 @@ function StateMachine:change(stateName, enterParams)
 end
 function StateMachine:update(dt)
 	self.current:update(dt)
-end
-
-function StateMachine:render()
-	self.current:render()
-end
-
-function StateMachine:process_ai(params, dt)
-	self.current:process_ai(params, dt)
 end

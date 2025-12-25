@@ -17,13 +17,13 @@ function love.load()
 
     gStateMachine = StateMachine {
         ['main_menu'] = function() return MainMenuState() end,
+        ['pause_menu'] = function() return PauseMenuState() end,
         ['play'] = function() return PlayState() end,
-        ['game-over'] = function() return GameOverState() end
+        ['game_over'] = function() return GameOverState() end
     }
     gStateMachine:change('main_menu')
 
     love.keyboard.keysPressed = {}
-
 end
 
 function love.resize(w, h)
@@ -45,6 +45,6 @@ end
 
 function love.draw()
     push:start()
-    gStateMachine:render()
+    gStateMachine.current:render()
     push:finish()
 end

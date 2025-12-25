@@ -5,13 +5,16 @@ function Room:init(player)
     self.width  = MAP_WIDTH
     self.height = MAP_HEIGHT
 
+    --for death world freeze
+    self.frozen = false
+
     -- tile grid
     self.tiles = {}
 
     -- assigned externally
     self.entities = {}
     self.projectiles = {}
-    self.dummy = dummy
+    --self.dummy = dummy
     self:generateEntities()
 
     self.player = player
@@ -161,7 +164,7 @@ function Room:generateWalls()
 end
 
 function Room:generateEntities()
-    local dummy = Entity {
+--[[    local dummy = Entity {
         room = self,
         max_health = ENTITY_DEFS['dummy'].max_health,
         walk_speed = ENTITY_DEFS['dummy'].walk_speed or 20,
@@ -178,15 +181,51 @@ function Room:generateEntities()
         ['idle'] = function() return EntityIdleState(dummy, self) end
     }
 
-    dummy:change_state('idle')
+    dummy:change_state('idle') ]]--
+
+    for i = 1, 3 do
+        local type = 'slime'
+
+        local ent = Enemy {
+            room = self,
+            max_health = ENTITY_DEFS[type].max_health,
+            health = ENTITY_DEFS[type].max_health,
+            walk_speed = ENTITY_DEFS[type].walk_speed or 20,
+            animations = ENTITY_DEFS[type].animations,
+            x = 790,
+            y = 790,
+            width = 16,
+            height = 16,
+
+            -- propagate damage (numeric) and optional attack/ai_profile
+            damage = ENTITY_DEFS[type].damage or 1,
+            attack = ENTITY_DEFS[type].attack,
+            ai_profile = ENTITY_DEFS[type].ai_profile
+        }
+
+        table.insert(self.entities, ent)
+
+        local DebugLog = require 'src.DebugLog'
+        DebugLog.log("[Room:generateEntities] Spawned enemy #%d attack=%s ai_profile=%s", #self.entities, tostring(ent.attack_name), tostring(ent.ai and ent.ai ~= nil))
+
+        -- Enemy:init sets up state_machine and AI; ensure it starts idle
+        ent:change_state('idle')
+    end
 end
 
 -- Update room + player
 function Room:update(dt)
-    --Entity updates
+    -- If frozen, ONLY update player animation (death)
+    if self.frozen then
+        if self.player then
+            self.player:update(dt)
+        end
+        return
+    end
+
+    -- ===== NORMAL WORLD UPDATE =====
     for _, entity in ipairs(self.entities) do
-        entity.state_machine:update(dt)
-        entity.current_animation:update(dt)
+        entity:update(dt)
     end
 
     --Check for entity deaths
@@ -198,7 +237,7 @@ function Room:update(dt)
         end
     end
 
-    --Update projectiles
+    -- Projectiles
     for i = #self.projectiles, 1, -1 do
         local p = self.projectiles[i]
         p:update(dt)
@@ -209,7 +248,7 @@ function Room:update(dt)
             -- Check collision with enemies
             for _, entity in ipairs(self.entities) do
                 if entity:collides(p) then
-                    entity:damage(p.damage)
+                    entity:deal_damage(p.damage)
                     p.active = false
                     break
                 end
@@ -217,30 +256,41 @@ function Room:update(dt)
         end
     end
 
-    --Update player
+    -- Player update
     if self.player then
         self.player:update(dt)
+    end
+
+    -- Enemy → Player collision
+    if self.player and not self.player.dead then
+        for _, entity in ipairs(self.entities) do
+            if entity:collides(self.player) and not self.player.invulnerable then
+                self.player:deal_damage(entity.damage or 1)
+
+                if self.player.health <= 0 then
+                    self.player.dead = true
+                    self.player:change_state('death')
+                    self.frozen = true
+                end
+
+                self.player:go_invulnerable(1)
+            end
+        end
     end
 end
 
 -- Render all tiles + player
-function Room:render(xOffset, yOffset, tileSize)
+function Room:renderWorld(xOffset, yOffset, tileSize)
     xOffset = xOffset or 0
     yOffset = yOffset or 0
     tileSize = tileSize or 16
-    
-    -- Render in correct order:
-    -- 1. Background (dirt) for ALL tiles
-    -- 2. Floor tiles (overwrites dirt where there's floor)
-    -- 3. Wall foreground (over background dirt)
-    
+
     for y = 1, self.height do
         for x = 1, self.width do
             local tile = self.tiles[y][x]
             local drawX = xOffset + (x - 1) * tileSize
             local drawY = yOffset + (y - 1) * tileSize
-            
-            -- LAYER 1: Background dirt (for all non-floor tiles)
+
             if tile.background then
                 love.graphics.draw(
                     gTextures[tile.background.sheet],
@@ -248,8 +298,7 @@ function Room:render(xOffset, yOffset, tileSize)
                     drawX, drawY
                 )
             end
-            
-            -- LAYER 2: Floor tiles (overwrites dirt)
+
             if tile.isFloor then
                 love.graphics.draw(
                     gTextures[tile.sheet],
@@ -257,8 +306,7 @@ function Room:render(xOffset, yOffset, tileSize)
                     drawX, drawY
                 )
             end
-            
-            -- LAYER 3: Wall foreground (over background dirt)
+
             if tile.foreground then
                 love.graphics.draw(
                     gTextures[tile.foreground.sheet],
@@ -268,34 +316,42 @@ function Room:render(xOffset, yOffset, tileSize)
             end
         end
     end
+end
 
+function Room:renderEntities()
+    -- === ENEMIES ===
     for _, entity in ipairs(self.entities) do
         entity:render()
 
+        -- HITBOX (debug)
         love.graphics.setColor(1, 0, 0, 1)
-        love.graphics.rectangle("line", entity.x, entity.y, entity.width, entity.height)
-        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.rectangle(
+            "line",
+            entity.x,
+            entity.y,
+            entity.width,
+            entity.height
+        )
 
-        if entity.health ~= nil and entity.health > 0 then
+        -- HEALTH BAR
+        if entity.health and entity.health > 0 then
             love.graphics.setColor(0, 1, 0, 1)
-            love.graphics.rectangle("fill", entity.x, entity.y - 5, (entity.health / entity.max_health) * entity.width, 3)
-            love.graphics.setColor(1, 1, 1, 1)
+            local w = (entity.health / entity.max_health) * entity.width
+            love.graphics.rectangle("fill", entity.x, entity.y - 5, w, 3)
         end
+
+        love.graphics.setColor(1, 1, 1, 1)
     end
 
-    for _, p in ipairs(self.projectiles) do
-        p:render()
+    -- === PROJECTILES ===
+    for _, projectile in ipairs(self.projectiles) do
+        projectile:render()
     end
-
-    -- Render player on top of everything (use state's render if available)
-    if self.player then
-        if self.player.state_machine and self.player.state_machine.render then
-            self.player.state_machine:render()
-        else
-            self.player:render()
-        end
-    end
-
 end
 
-return Room
+
+function Room:renderPlayer()
+    if self.player then
+        self.player:render()
+    end
+end

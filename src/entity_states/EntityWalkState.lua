@@ -30,8 +30,12 @@ function EntityWalkState:update(dt)
             newY = newY + speed * dt
         end
         
-        local minX, maxX = 20, VIRTUAL_WIDTH - 20 - self.entity.width
-        local minY, maxY = 20, VIRTUAL_HEIGHT - 20 - self.entity.height
+-- Clamp to room/world bounds (not the virtual screen size)
+        local roomWidthPixels = (self.entity.room and self.entity.room.width * TILE_SIZE) or VIRTUAL_WIDTH
+        local roomHeightPixels = (self.entity.room and self.entity.room.height * TILE_SIZE) or VIRTUAL_HEIGHT
+
+        local minX, maxX = 20, roomWidthPixels - 20 - self.entity.width
+        local minY, maxY = 20, roomHeightPixels - 20 - self.entity.height
         
         if newX < minX then
             newX = minX
@@ -51,32 +55,4 @@ function EntityWalkState:update(dt)
         
         self.entity.x, self.entity.y = newX, newY
     end
-end
-
-function EntityWalkState:process_ai(params, dt)
-    local room = params and params.room or self.room
-    local directions = {'left', 'right', 'up', 'down'}
-    
-    if self.moveDuration == 0 or self.bumped then
-        self.moveDuration = math.random(5)
-        self.entity.direction = directions[math.random(#directions)]
-        self.entity:change_animation('walk-' .. tostring(self.entity.direction))
-    elseif self.movementTimer > self.moveDuration then
-        self.movementTimer = 0
-        
-        if math.random(3) == 1 then
-            self.entity:change_state('idle')
-        else
-            self.moveDuration = math.random(5)
-            self.entity.direction = directions[math.random(#directions)]
-            self.entity:change_animation('walk-' .. tostring(self.entity.direction))
-        end
-    end
-    
-    self.movementTimer = self.movementTimer + dt
-end
-
-function EntityWalkState:render() 
-    local anim = self.entity.current_animation
-    love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()], math.floor(self.entity.x - (self.entity.offset_x or 0)), math.floor(self.entity.y - (self.entity.offset_y or 0)))
 end

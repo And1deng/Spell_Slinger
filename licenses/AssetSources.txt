@@ -7,3 +7,6 @@ Backgrounds from Dark Forest by Val_DeMar (CC0)
 Tilemap:
 “Forgotten-Marshes asset pack by Jaraten”
 https://jaraten.itch.io/forgotten-marshes-asset-pack
+
+Slime:
+https://devillas.itch.io/mystic-rpg-asset-pack

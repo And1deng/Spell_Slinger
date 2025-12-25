@@ -1,5 +1,26 @@
+AI_PROFILES = {
+    basic = {
+        chaseRange = 120,
+        attackRange = 40,
+        fleeHealth = 0
+    },
+
+    coward = {
+        chaseRange = 80,
+        attackRange = 30,
+        fleeHealth = 0.4
+    },
+
+    sniper = {
+        chaseRange = 200,
+        attackRange = 140,
+        fleeHealth = 0.2
+    }
+}
+
 ENTITY_DEFS = {
     ['player'] = {
+        max_health = 2,
         walk_speed = 100,
         animations = {
             ['walk-left'] = {
@@ -37,6 +58,12 @@ ENTITY_DEFS = {
             ['idle-down'] = {
                 frames = {1},
                 texture = 'character-walk-down'
+            },
+            ['death'] = {
+                frames = {1,2,3,4,5,6,7,8},
+                interval = 0.2,
+                texture = 'character-death',
+                looping = false
             }
         }
     },
@@ -82,5 +109,57 @@ ENTITY_DEFS = {
                 texture = 'character-walk-down'
             }
         }
+    },
+    ['slime'] = {
+        max_health = 10,
+        damage = 1,
+        walk_speed = 20,
+        animations = {
+            ['walk-left'] = {
+                frames = {1,2,3,4,5},
+                interval = 0.2,
+                texture = 'slime',
+                flip = true
+            },
+            ['walk-right'] = {
+                frames = {6,7,8,9,10},
+                interval = 0.2,
+                texture = 'slime'
+            },
+            ['walk-up'] = {
+                frames = {11,12,13,14,15},
+                interval = 0.2,
+                texture = 'slime'
+            },
+            ['walk-down'] = {
+                frames = {1,2,3,4,5},
+                interval = 0.2,
+                texture = 'slime'
+            },
+            ['idle-left'] = {
+                frames = {1},
+                texture = 'slime'
+            },
+            ['idle-right'] = {
+                frames = {1},
+                texture = 'slime'
+            },
+            ['idle-up'] = {
+                frames = {1},
+                texture = 'slime'
+            },
+            ['idle-down'] = {
+                frames = {1},
+                texture = 'slime'
+            },
+            ['death'] = {
+                frames = {16,17,18,19},
+                interval = 0.2,
+                texture = 'character-death',
+                looping = false
+            }
+        },
+        ai_profile = { type = 'aggro', range = AI_PROFILES.basic.chaseRange }
     }
-}
+} 
+

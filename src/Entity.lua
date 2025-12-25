@@ -1,5 +1,7 @@
 Entity = Class{}
 
+local DEBUG_ENTITY_STATES = true
+
 function Entity:init(def)
     -- top-down direction
     self.direction = 'down'
@@ -34,6 +36,7 @@ function Entity:init(def)
     self.flash_timer = 0
 
     self.dead = false
+    self.remove = false
 end
 
 function Entity:create_animations(animations)
@@ -57,8 +60,16 @@ function Entity:collides(target)
                 self.y > target.y + target.height)
 end
 
-function Entity:damage(dmg)
+function Entity:deal_damage(dmg)
+    if self.dead then return end
+
     self.health = self.health - dmg
+
+    if self.health <= 0 then
+        self.dead = true
+        self:change_state('death')
+        self:change_animation('death')
+    end
 end
 
 function Entity:go_invulnerable(duration)
@@ -67,14 +78,38 @@ function Entity:go_invulnerable(duration)
 end
 
 function Entity:change_state(name)
+    if DEBUG_ENTITY_STATES then
+        local DebugLog = require 'src.DebugLog'
+        DebugLog.log("[Entity:change_state] %s -> %s", tostring(self), tostring(name))
+    end
     self.state_machine:change(name)
 end
 
 function Entity:change_animation(name)
     self.current_animation = self.animations[name]
+    self.current_animation:refresh()
 end
 
 function Entity:update(dt)
+
+    -- =========================
+    -- DEATH HANDLING (TOP PRIORITY)
+    -- =========================
+    if self.dead then
+        if self.current_animation then
+            self.current_animation:update(dt)
+
+            -- remove entity AFTER death animation finishes
+            if self.current_animation.timesPlayed > 0 then
+                self.remove = true
+            end
+        end
+        return
+    end
+
+    -- =========================
+    -- INVULNERABILITY
+    -- =========================
     if self.invulnerable then
         self.flash_timer = self.flash_timer + dt
         self.invulnerable_timer = self.invulnerable_timer + dt
@@ -87,26 +122,40 @@ function Entity:update(dt)
         end
     end
 
-    -- update animation + state
+    -- =========================
+    -- ANIMATION
+    -- =========================
     if self.current_animation then
         self.current_animation:update(dt)
     end
 
+    -- =========================
+    -- STATE MACHINE
+    -- =========================
     if self.state_machine then
         self.state_machine:update(dt)
     end
 end
 
-function Entity:process_ai(params, dt)
-    self.state_machine:process_ai(params, dt)
-end
 
 function Entity:render()
     local anim = self.current_animation
-    local texture = gTextures[anim.texture]
-    local quad = gFrames[anim.texture][anim:getCurrentFrame()]
 
-    love.graphics.draw(texture, quad, math.floor(self.x - (self.offset_x or 0)), math.floor(self.y - (self.offset_y or 0)))
+    local texture = gTextures[anim.texture]
+    if not texture then return end
+    local quad = gFrames[anim.texture] and gFrames[anim.texture][anim:getCurrentFrame()]
+    if not quad then return end
+
+    local scaleX = anim.flip and -1 or 1
+
+    love.graphics.draw(
+        texture,
+        quad,
+        math.floor(self.x - (self.offset_x or 0)),
+        math.floor(self.y - (self.offset_y or 0)),
+        0,        -- rotation
+        scaleX, 1 -- scaleX flips if -1
+    )
 end
 
 

@@ -35,7 +35,7 @@ ATTACK_DEFS = {
                     dx = ndx,
                     dy = ndy,
                     speed = 200,
-                    damage = 1,
+                    damage = 5,
                     lifetime = 1
                 }))
                 return

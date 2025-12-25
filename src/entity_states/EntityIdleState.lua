@@ -25,9 +25,3 @@ function EntityIdleState:process_ai(params, dt)
         end
     end
 end
-
-function EntityIdleState:render()
-    local anim = self.entity.current_animation
-    love.graphics.draw(gTextures[anim.texture], gFrames[anim.texture][anim:getCurrentFrame()],
-        math.floor(self.entity.x - (self.entity.offset_x or 0)), math.floor(self.entity.y - (self.entity.offset_y or 0)))
-end
