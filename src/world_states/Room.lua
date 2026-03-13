@@ -17,6 +17,9 @@ function Room:init(player)
     --self.dummy = dummy
     self:generateEntities()
 
+    self.noiseSeedX = love.math.random(1, 100000)
+    self.noiseSeedY = love.math.random(1, 100000)
+
     self.player = player
 end
 
@@ -38,8 +41,12 @@ function Room:generateCircularOverworld()
             local distance = math.sqrt(dx * dx + dy * dy)
             
             -- Generate noise value
-            local noiseValue = perlin:noise(x * 0.05, y * 0.05)
-            local normalizedNoise = (noiseValue + 1) / 2  -- Convert -1..1 to 0..1
+            local normalizedNoise = love.math.noise(
+                (x + self.noiseSeedX) * 0.05,
+                (y + self.noiseSeedY) * 0.05
+            )
+
+
             
             -- Adjust radius with noise
             local radiusVariation = normalizedNoise * 10 - 5  -- -5 to +5

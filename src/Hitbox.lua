@@ -1,3 +1,4 @@
+--Simple Hitbox class for collision detection
 Hitbox = Class{}
 
 function Hitbox:init(x, y, width, height)

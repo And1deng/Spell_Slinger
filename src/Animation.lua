@@ -1,39 +1,39 @@
---[[
-    GD50
-    Legend of Zelda
-
-    -- Animation Class --
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-]]
+--Animation class. Credit to CS50's intro to game development course.
 
 Animation = Class{}
 
+--Init
 function Animation:init(def)
+    --Help determine when to change frames since some animations will have different intervals
     self.frames = def.frames
     self.interval = def.interval
-    self.texture = def.texture
-    self.looping = def.looping ~= false
-
-
     self.timer = 0
     self.currentFrame = 1
 
-    -- used to see if we've seen a whole loop of the animation
+    --Texture and loop management (looping default true)
+    self.texture = def.texture
+    self.looping = def.looping ~= false
+
+    --Help with timing and frame tracking
+    self.timer = 0
+    self.currentFrame = 1
+
+    --Ensure death animation played through once before transitioning to game over screen
     self.timesPlayed = 0
 end
 
+--Reset animation to first frame
 function Animation:refresh()
     self.timer = 0
     self.currentFrame = 1
     self.timesPlayed = 0
 end
 
+--Update. Increment timer, manage frame/interval, and track times played for non-looping animations (death)
 function Animation:update(dt)
     self.timer = self.timer + dt
 
-    if self.timer > self.interval then
+    if self.timer >= self.interval then
         self.timer = self.timer % self.interval
         self.currentFrame = self.currentFrame + 1
 
@@ -49,7 +49,7 @@ function Animation:update(dt)
     end
 end
 
-
+--Retrieve current frame to Entity:render
 function Animation:getCurrentFrame()
     return self.frames[self.currentFrame]
 end

@@ -1,22 +1,21 @@
+--Class includes
 Class = require 'lib/class'
 Event = require 'lib/knife.event'
 push = require 'lib/push'
 Timer = require 'lib/knife.timer'
 
-
--- resources
+--General resources
 require 'src/StateMachine'
 require 'src/constants'
 require 'src/Entity'
 require 'src/Player'
 require 'src/Util'
 require 'src/BackgroundParallax'
-require 'src/perlin'
 require 'src/Animation'
 require 'src/Projectile'
 require 'src/Hitbox'
 
--- game states
+--Game states
 require 'src/game_states/BaseState'
 require 'src/game_states/MainMenuState'
 require 'src/game_states/PauseMenuState'
@@ -24,29 +23,29 @@ require 'src/game_states/PlayState'
 require 'src/game_states/GameOverState'
 require 'src/world_states/Room'
 
--- entity states
+--General entity states
 require 'src/entity_states/EntityIdleState'
 require 'src/entity_states/EntityWalkState'
 require 'src/entity_states/EntityAttackState'
 require 'src/entity_states/EntityDeathState'
--- enemy base states & AI
+--Enemy base states & AI
 require 'src/entity_states/enemies/Enemy'
 require 'src/entity_states/enemies/BaseEnemyAI'
 require 'src/entity_states/enemies/BaseEnemyIdle'
 require 'src/entity_states/enemies/BaseEnemyAttack'
 require 'src/entity_states/enemies/BaseEnemyAggro'
 require 'src/entity_states/enemies/BaseEnemyDeath'
--- player states
+--Player states
 require 'src/entity_states/player/PlayerIdleState'
 require 'src/entity_states/player/PlayerWalkState'
 require 'src/entity_states/player/PlayerDodgeState'
 require 'src/entity_states/player/PlayerDeathState'
 
--- data
+--Defintion files
 require 'src/entity_definitions'
 require 'src/attack_definitions'
 
--- resources
+--Texture + UI resources
 gTextures = {
     ['tiles'] = love.graphics.newImage('graphics/temp_tilemap/Tilesets/dark_grass.png'),
     ['filler'] = love.graphics.newImage('graphics/temp_tilemap/Tilesets/mud.png'),

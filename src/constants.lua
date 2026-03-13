@@ -1,12 +1,12 @@
 --Constants used throughout the game
---Window Dimensions--
+--Window Dimensions
 VIRTUAL_WIDTH = 384
 VIRTUAL_HEIGHT = 216
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
---directions
+--Directions
 DIRECTION_VECTORS = {
     up    = {0, -1},
     down  = {0, 1},
@@ -20,7 +20,7 @@ DIRECTION_VECTORS = {
 }
 
 
---user inputs--
+--User inputs
 MOVE_LEFT = 'a'
 MOVE_RIGHT = 'd'
 MOVE_UP = 'w'
@@ -33,22 +33,20 @@ INPUT_DOWN = 'down'
 INPUT_LEFT = 'left'
 INPUT_RIGHT = 'right'
 
-
-
---Tile Size--
+--Tile Size
 TILE_SIZE = 16
 
---Map Dimensions--
+--Map Dimensions in tiles
 MAP_WIDTH = 100
 MAP_HEIGHT = 100
 
 MAP_RENDER_OFFSET_X = (VIRTUAL_WIDTH - (MAP_WIDTH * TILE_SIZE)) / 2
 MAP_RENDER_OFFSET_Y = (VIRTUAL_HEIGHT - (MAP_HEIGHT * TILE_SIZE)) / 2
 
---Tile IDs--
+--Tile IDs
 TILE_IDS = {
 
-    -- Dark Grass floor tiles
+    --Dark Grass floor tiles
     DARK_GRASS_FLOORS = {
         sheet = 'tiles',
         variants = {1, 8, 15}
@@ -58,7 +56,7 @@ TILE_IDS = {
         variants = {1}
     },
 
-    -- Wall corner tiles
+    --Wall corner tiles
     DIRT_WALL_TOP_LEFT_CORNER = {
         sheet = 'walls',
         variants = {3}
@@ -79,7 +77,7 @@ TILE_IDS = {
         variants = {15}
     },
 
-    -- Wall straight sections
+    --Wall straight sections
     DIRT_WALL_TOP_WALLS = {
         sheet = 'walls',
         variants = {4}
@@ -118,6 +116,7 @@ TILE_IDS.WALL = {
     }
 }
 
+--To determine which wall tile to render based on adjacent walls, using a bitmask system where each direction corresponds to a bit value
 WALL_MASK_MAP = {
     [1+4]   = "TOP_LEFT_CORNER",      -- Up + Left
     [1]     = "TOP_EDGE",             -- Up only
@@ -130,6 +129,5 @@ WALL_MASK_MAP = {
     [2]     = "BOTTOM_EDGE",          -- Down only
     [2+8]   = "BOTTOM_RIGHT_CORNER",  -- Down + Right
 
-    -- Surrounded on all 4 sides → inner fill
     [1+2+4+8] = "CENTER_FILL",
 }

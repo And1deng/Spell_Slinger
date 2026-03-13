@@ -6,13 +6,18 @@ function PlayerIdleState:init(player)
 
     self.entity.offset_y = 24
     self.entity.offset_x = 40
+end
+
+function PlayerIdleState:enter()
+    self.entity.offset_y = 24
+    self.entity.offset_x = 40
 
     -- set idle animation based on facing direction
     self.entity:change_animation('idle-' .. self.entity.direction)
 end
 
 function PlayerIdleState:update(dt)
-    self.dx, self.dy = 0, 0
+    self.entity.dx, self.entity.dy = 0, 0   
     
     if love.keyboard.isDown(MOVE_UP) or
         love.keyboard.isDown(MOVE_DOWN) or

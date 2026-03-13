@@ -1,23 +1,13 @@
+--Enemy AI, can add more profiles for different enemy behaviors
 AI_PROFILES = {
     basic = {
         chaseRange = 120,
         attackRange = 40,
         fleeHealth = 0
-    },
-
-    coward = {
-        chaseRange = 80,
-        attackRange = 30,
-        fleeHealth = 0.4
-    },
-
-    sniper = {
-        chaseRange = 200,
-        attackRange = 140,
-        fleeHealth = 0.2
     }
 }
 
+--Player and enemy definitions, including animations and stats. Can be expanded with more entities and properties as needed.
 ENTITY_DEFS = {
     ['player'] = {
         max_health = 2,

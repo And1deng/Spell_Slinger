@@ -136,3 +136,8 @@ function PlayState:render()
     -- SPELL CAST INPUTS (screen-space)
     self.player:render_cast()
 end
+
+--Camera getter for Player.lua to use for spell auto-aim system
+function PlayState:get_camera()
+    return self.camX, self.camY
+end
