@@ -1,42 +1,47 @@
+--[[Projectile
+Used for spells and other ranged attacks
+Takes parameters from attack_definitions.lua and provides update and render functions for projectiles in the game world
+]]--
 Projectile = Class{}
 
 function Projectile:init(params)
     --Passed parameters from attack_definitions.lua
+    self.owner = params.owner or nil
     self.texture = params.texture
     self.x = params.x
     self.y = params.y
     self.width = params.width
     self.height = params.height
-    self.dx = params.dx
-    self.dy = params.dy
-    self.speed = params.speed or 200
-    self.damage = params.damage or 1
-    self.lifetime = params.lifetime or 1
+    self.vector_x = params.vector_x
+    self.vector_y = params.vector_y
+    self.speed = params.speed
+    self.damage = params.damage
+    self.lifetime = params.lifetime
 
     --Utils for animations and projectile behavior
-    self.animations = params.animations and self:create_animations(params.animations) or nil
+    self.animations = params.animations and self:createAnimations(params.animations) or nil
     self.direction = params.direction or 'right'
     self.age = 0
     self.active = true
+    self.sprite_rotation = math.atan2(self.vector_y, self.vector_x)
 
     --Runs with or without animations (so I can use a png for development)
     if self.animations then
         local animName = params.animation or next(self.animations)
-        self.current_animation = self.animations[animName]
+        self.currentAnimation = self.animations[animName]
     else
-        self.current_animation = nil
+        self.currentAnimation = nil
     end
 
     self.hurtbox = Hitbox(params.x, params.y, params.width, params.height)
 
     --Offset if projectile texture is misaligned
-    self.offset_x = params.offset_x or params.offsetX or 0
-    self.offset_y = params.offset_y or params.offsetY or 0
+    self.offset_x = params.offset_x or params.offset_x or 0
+    self.offset_y = params.offset_y or params.offset_y or 0
 
-    --Projectile velocity calculation, dx and dy are passed as direction unit vector components
-    if params.dx and params.dy then
-            self.vx = params.dx * self.speed
-            self.vy = params.dy * self.speed
+    if params.vector_x and params.vector_y then
+            self.dx = params.vector_x * self.speed
+            self.dy = params.vector_y * self.speed
     end
 end
 
@@ -47,11 +52,11 @@ function Projectile:update(dt)
 
     self.age = self.age + dt
 
-    self.x = self.x + self.vx * dt
-    self.y = self.y + self.vy * dt
+    self.x = self.x + self.dx * dt
+    self.y = self.y + self.dy * dt
 
-    if self.current_animation then
-        self.current_animation:update(dt)
+    if self.currentAnimation then
+        self.currentAnimation:update(dt)
     end
 
     if self.age >= self.lifetime then
@@ -60,7 +65,7 @@ function Projectile:update(dt)
 end
 
 --Both animation functions copied from Entity.lua for future animation support
-function Projectile:create_animations(animations)
+function Projectile:createAnimations(animations)
     local anims = {}
 
     for k, def in pairs(animations) do
@@ -76,29 +81,29 @@ function Projectile:create_animations(animations)
 end
 
 
-function Projectile:change_animation(name)
+function Projectile:changeAnimation(name)
     local new_animation = self.animations[name]
     if not new_animation then return end
 
-    if self.current_animation ~= new_animation then
-        self.current_animation = new_animation
-        self.current_animation:refresh()
+    if self.currentAnimation ~= new_animation then
+        self.currentAnimation = new_animation
+        self.currentAnimation:refresh()
     end
 end
 
 function Projectile:render()
     if not self.active then return end
 
-    if self.current_animation then
-        local anim = self.current_animation
+    if self.currentAnimation then
+        local anim = self.currentAnimation
         local texture = gTextures[anim.texture]
         local quad = gFrames[anim.texture][anim:getCurrentFrame()]
         local texture_w, texture_h = texture:getDimensions()
         love.graphics.draw(texture, quad, math.floor(self.x - self.offset_x), math.floor(self.y - self.offset_y),
-            0, self.width / texture_w, self.height / texture_h)
+            self.sprite_rotation, self.width / texture_w, self.height / texture_h)
     elseif self.texture then
         local texture = gTextures[self.texture]
         local texture_w, texture_h = texture:getDimensions()
-        love.graphics.draw(texture, math.floor(self.x - self.offset_x), math.floor(self.y - self.offset_y), 0, self.width / texture_w, self.height / texture_h)
+        love.graphics.draw(texture, math.floor(self.x - self.offset_x), math.floor(self.y - self.offset_y), self.sprite_rotation, self.width / texture_w, self.height / texture_h)
     end
 end

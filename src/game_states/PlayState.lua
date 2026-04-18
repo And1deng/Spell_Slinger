@@ -1,26 +1,44 @@
+--[[PlayState
+Credit to CS50's intro to game development course
+Manages the main game loop, including player updates, room updates, camera movement, and UI rendering
+Also handles player death transition and game over state change
+]]--
+--Manages the camera, UI, and main game loop
 PlayState = Class{__includes = BaseState}
 
+--Init only handles UI positions since they do not need to be reset
 function PlayState:init()
-    self.camX = 0
-    self.camY = 0
+    self.health_bar_w = 200
+    self.health_bar_h = 20
+    self.health_bar_x = VIRTUAL_WIDTH / 2 - self.health_bar_w / 2
+    self.health_bar_y = VIRTUAL_HEIGHT - 40
+end
 
-    local mapCenterX = (MAP_WIDTH * TILE_SIZE) / 2
-    local mapCenterY = (MAP_HEIGHT * TILE_SIZE) / 2
+function PlayState:enter()
+    self:reset()
+end
 
-    self.player = Player { --Need to reset health on entering from main menu
+--Room generation and player reset in here so game can restart when player dies and re enters from main menu
+function PlayState:reset()
+    self.final_cam_x = 0
+    self.final_cam_y = 0
+    self.transition_alpha = 0
+
+    local map_center_x = (MAP_WIDTH * TILE_SIZE) / 2
+    local map_center_y = (MAP_HEIGHT * TILE_SIZE) / 2
+
+    self.player = Player {
         max_health = ENTITY_DEFS['player'].max_health,
         health = ENTITY_DEFS['player'].max_health,
         walk_speed = ENTITY_DEFS['player'].walk_speed,
         animations = ENTITY_DEFS['player'].animations,
-        x = mapCenterX - 8,
-        y = mapCenterY - 8,
+        x = map_center_x - 8,
+        y = map_center_y - 8,
+        offset_x = ENTITY_DEFS['player'].offset_x,
+        offset_y = ENTITY_DEFS['player'].offset_y,
         width = 16,
         height = 16,
     }
-
-    self.room = Room(self.player)
-    self.player.room = self.room
-    self.room:generateCircularOverworld()
 
     self.player.state_machine = StateMachine {
         ['idle'] = function() return PlayerIdleState(self.player) end,
@@ -28,37 +46,30 @@ function PlayState:init()
         ['dodge'] = function() return PlayerDodgeState(self.player) end,
         ['death'] = function() return PlayerDeathState(self.player) end,
     }
-    self.player:change_state('idle')
 
-    --UI elements
-    healthBarWidth = 200
-    healthBarHeight = 20
-    healthBarX = VIRTUAL_WIDTH / 2 - healthBarWidth / 2
-    healthBarY = VIRTUAL_HEIGHT - 40
-    self.transitionAlpha = 0
+    self.room = Room(self.player)
+    self.player.room = self.room
+
+    self.room:generateWorld()
+    self.room:generateEntities()
+
+    self.player:changeState('idle')
+    self.player:changeAnimation('idle')
 end
 
-function PlayState:enter()
-    self.player.health = self.player.max_health
-    self.player.dead = false
-    self.transitionAlpha = 0
-    self.player:change_state('idle')
-end
-
+--Move camera to follow player with map clamping to prevent showing areas outside of map bounds
 function PlayState:updateCamera()
-    -- Get map boundaries in pixels
-    local mapWidthPixels = self.room.width * TILE_SIZE
-    local mapHeightPixels = self.room.height * TILE_SIZE
-    
-    -- Calculate ideal camera position (centered on player)
-    local targetX = self.player.x - VIRTUAL_WIDTH / 2 + self.player.width / 2
-    local targetY = self.player.y - VIRTUAL_HEIGHT / 2 + self.player.height / 2
-    
-    -- Clamp to map boundaries
-    self.camX = math.max(0, math.min(targetX, mapWidthPixels - VIRTUAL_WIDTH))
-    self.camY = math.max(0, math.min(targetY, mapHeightPixels - VIRTUAL_HEIGHT))
+    local map_width = self.room.width * TILE_SIZE
+    local map_height = self.room.height * TILE_SIZE
+
+    local cam_center_x = self.player.x - VIRTUAL_WIDTH / 2 + self.player.width / 2
+    local cam_center_y = self.player.y - VIRTUAL_HEIGHT / 2 + self.player.height / 2
+
+    self.final_cam_x = math.max(0, math.min(cam_center_x, map_width - VIRTUAL_WIDTH))
+    self.final_cam_y = math.max(0, math.min(cam_center_y, map_height - VIRTUAL_HEIGHT))
 end
 
+--Updates for Room (player is managed in room) + Camera, also plays death transition
 function PlayState:update(dt)
     if love.keyboard.wasPressed('escape') then
         gStateMachine:change('pause_menu')
@@ -69,75 +80,66 @@ function PlayState:update(dt)
     self:updateCamera()
 
     if self.player.dead then
-        local anim = self.player.current_animation
+        self.transition_alpha = math.min(1, self.transition_alpha + dt)
 
-        if anim and anim.timesPlayed > 0 then
-            self.transitionAlpha = math.min(1, self.transitionAlpha + dt)
-
-            if self.transitionAlpha >= 1 then
-                gStateMachine:change('game_over')
-            end
+        if self.transition_alpha >= 1 then
+            gStateMachine:change('game_over')
         end
 
         return
     end
 end
 
-
+--Render font + health bar UI, also contains debug player hit box for debugging purposes
 function PlayState:renderUI()
-    love.graphics.setFont(gFonts['DebugFont'])
-
-    -- health bar
     love.graphics.setColor(0.2, 0.2, 0.2, 1)
-    love.graphics.rectangle("fill", healthBarX, healthBarY, healthBarWidth, healthBarHeight)
+    love.graphics.rectangle("fill", self.health_bar_x, self.health_bar_y, self.health_bar_w, self.health_bar_h)
 
     love.graphics.setColor(0, 1, 0, 1)
-    local hw = (self.player.health / self.player.max_health) * healthBarWidth
-    love.graphics.rectangle("fill", healthBarX, healthBarY, hw, healthBarHeight)
+    local healthFill = (self.player.health / self.player.max_health) * self.health_bar_w
+    love.graphics.rectangle("fill", self.health_bar_x, self.health_bar_y, healthFill, self.health_bar_h)
 
     love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.rectangle("line", healthBarX, healthBarY, healthBarWidth, healthBarHeight)
+    love.graphics.rectangle("line", self.health_bar_x, self.health_bar_y, self.health_bar_w, self.health_bar_h)
 
-    -- DEBUG: player position
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.print(
-        string.format("Player: %.1f, %.1f", self.player.x, self.player.y),
-        10,
-        10
-    )
+    --Display for debug player position
+    if DEBUG_MODE then
+        love.graphics.setFont(gFonts['DebugFont'])
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.print(string.format("Player: %.1f, %.1f", self.player.x, self.player.y), 10, 10)
+    end
 end
 
 function PlayState:render()
-    -- ===== WORLD =====
     love.graphics.push()
-    love.graphics.translate(-math.floor(self.camX), -math.floor(self.camY))
+    love.graphics.translate(-math.floor(self.final_cam_x), -math.floor(self.final_cam_y))
 
     self.room:renderWorld(0, 0, TILE_SIZE)
     self.room:renderEntities()
 
+    if DEBUG_MODE then
+        self.room:renderCollisionDebug()
+    end
+
     love.graphics.pop()
 
-    -- ===== FADE (between world & player) =====
     if self.player.dead then
-        love.graphics.setColor(0, 0, 0, self.transitionAlpha)
+        love.graphics.setColor(0, 0, 0, self.transition_alpha)
         love.graphics.rectangle('fill', 0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT)
         love.graphics.setColor(1, 1, 1, 1)
     end
 
-    -- ===== PLAYER (always visible) =====
     love.graphics.push()
-    love.graphics.translate(-math.floor(self.camX), -math.floor(self.camY))
+    love.graphics.translate(-math.floor(self.final_cam_x), -math.floor(self.final_cam_y))
     self.room:renderPlayer()
     love.graphics.pop()
 
-    -- ===== UI =====
     self:renderUI()
 
-    -- SPELL CAST INPUTS (screen-space)
-    self.player:render_cast()
+    self.player:renderCast()
 end
 
 --Camera getter for Player.lua to use for spell auto-aim system
-function PlayState:get_camera()
-    return self.camX, self.camY
+function PlayState:getCamera()
+    return self.final_cam_x, self.final_cam_y
 end

@@ -1,11 +1,10 @@
+--[[Game Over State
+Displayed when player dies and prompts them to return to main menu with Enter key
+]]--
+
 GameOverState = Class{__includes = BaseState}
 
-function GameOverState:init()
-    self.timer = 0
-end
-
 function GameOverState:update(dt)
-    -- Return to main menu on Enter
     if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
         gStateMachine:change('main_menu')
     end

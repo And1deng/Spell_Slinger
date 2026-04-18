@@ -1,4 +1,7 @@
---State Machine. Credit to CS50's intro to game development course.
+--[[StateMachine
+Credit to Colton Ogden's CS50G work for the base structure and functions of this class
+
+]]--
 StateMachine = Class{}
 
 function StateMachine:init(states) 
@@ -9,25 +12,30 @@ function StateMachine:init(states)
 		exit = function() end
 	}
     --Cache for state instances to prevent unnecessary re-instantiation
-    self.stateConstructors = states or {}
-    self.stateInstances = {}
+    self.state_constructors = states or {}
+    self.state_instances = {}
     self.current = self.empty
 end
 
-function StateMachine:change(stateName, enterParams)
-    assert(self.stateConstructors[stateName])
-    
+function StateMachine:change(state_name, enter_params)
+    assert(self.state_constructors[state_name])
+
     self.current:exit()
-     
-    -- Get or create state instance from cache
-    if not self.stateInstances[stateName] then
-        self.stateInstances[stateName] = self.stateConstructors[stateName]()
+
+    if not self.state_instances[state_name] then
+        self.state_instances[state_name] = self.state_constructors[state_name]()
     end
-    
-    self.current = self.stateInstances[stateName]
-    self.current:enter(enterParams)
+
+    self.current = self.state_instances[state_name]
+    self.current_name = state_name
+    self.current:enter(enter_params)
 end
 
 function StateMachine:update(dt)
 	self.current:update(dt)
+end
+
+--added for hitbox debugging in BaseEnemyAttack
+function StateMachine:render()
+    self.current:render()
 end

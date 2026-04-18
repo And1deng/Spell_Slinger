@@ -1,7 +1,8 @@
---[[Main Menu State
-Title
-2 option - play, exit
-]]
+--[[Main Menu
+Only two options: 
+    Play: Starts the game
+    Exit: Quits the game
+]]--
 
 MainMenuState = Class{__includes = BaseState}
 

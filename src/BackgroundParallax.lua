@@ -1,4 +1,8 @@
---Background parallax class. Manages multiple layers of background images that scroll at different speeds to create a parallax effect.
+--[[BackgroundParallaz
+Manages the main menu background parallax effect
+Contains layer defs, speeds, and x if needed for seamless loops
+
+]]--
 BackgroundParallax = Class{}
 
 function BackgroundParallax:init()
@@ -14,7 +18,7 @@ end
 
 function BackgroundParallax:update(dt)
     --Move each layer by unique speed, and reset x to 0 when the image has fully scrolled for seamless loops.
-    for _, layer in ipairs(self.layers) do
+    for i, layer in ipairs(self.layers) do
         layer.x = layer.x - layer.speed * dt
         if layer.x <= -layer.image:getWidth() then
             layer.x = 0
@@ -23,7 +27,7 @@ function BackgroundParallax:update(dt)
 end
 
 function BackgroundParallax:render()
-    for _, layer in ipairs(self.layers) do
+    for i, layer in ipairs(self.layers) do
         love.graphics.draw(layer.image, layer.x, 0)
         love.graphics.draw(layer.image, layer.x + layer.image:getWidth(), 0)
     end

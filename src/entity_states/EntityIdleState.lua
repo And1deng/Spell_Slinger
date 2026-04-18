@@ -1,27 +1,28 @@
+--[[EntityIdleState
+Base idle state for all entities
+Contains AI processing for idle behavior, for livlier enemies and NPCs
+]]--
+
 EntityIdleState = Class{__includes = BaseState}
 
 function EntityIdleState:init(entity)
     self.entity = entity
 
-    self.entity:change_animation('idle-' .. self.entity.direction)
+    self.entity:changeAnimation('idle_' .. self.entity.direction)
 
     -- used for AI waiting
-    self.waitDuration = 0
-    self.waitTimer = 0
+    self.wait_duration = 0
+    self.wait_timer = 0
 end
 
---[[
-    We can call this function if we want to use this state on an agent in our game; otherwise,
-    we can use this same state in our Player class and have it not take action.
-]]
 function EntityIdleState:process_ai(params, dt)
-    if self.waitDuration == 0 then
-        self.waitDuration = math.random(5)
+    if self.wait_duration == 0 then
+        self.wait_duration = math.random(5)
     else
-        self.waitTimer = self.waitTimer + dt
+        self.wait_timer = self.wait_timer + dt
 
-        if self.waitTimer > self.waitDuration then
-            self.entity:change_state('walk')
+        if self.wait_timer > self.wait_duration then
+            self.entity:changeState('walk')
         end
     end
 end

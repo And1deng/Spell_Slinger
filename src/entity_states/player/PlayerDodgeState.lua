@@ -1,89 +1,78 @@
--- PlayerDodgeState.lua
+--[[PlayerDodgeState
+Player dodge based on config in entity_definitions.lua
+PlayerDodgeState is entered from PlayerIdleState or PlayerWalkState when DODGE input is detected, so params should always be passed 
+]]--
 PlayerDodgeState = Class{__includes = EntityWalkState}
 
 function PlayerDodgeState:init(player)
     self.entity = player
 
-    self.entity.offset_y = 24
-    self.entity.offset_x = 40
+    self.entity.offset_x = ENTITY_DEFS['player'].offset_x
+    self.entity.offset_y = ENTITY_DEFS['player'].offset_y
 
-    -- Dodge movement config
-    self.dodgeDistance = 50
-    self.dodgeSpeed = 400
-    self.dodgeTimer = 0
-    self.dodgeDuration = self.dodgeDistance / self.dodgeSpeed
+    self.dodge_distance = ENTITY_DEFS['player'].dodge_distance
+    self.dodge_speed = ENTITY_DEFS['player'].dodge_speed
+    self.dodge_timer = 0
+    self.entity.invulnerable_timer = 0
+    self.entity.invulnerable_duration = self.dodge_distance / self.dodge_speed
 
-    -- default vector
-    self.dx = 0
-    self.dy = 0
+    self.direction_x = 0
+    self.direction_y = 0
 end
 
 function PlayerDodgeState:enter(params)
-    self.dodgeTimer = 0
+    self.dodge_timer = 0
+    self.entity.invulnerable = true
+    self.entity.invulnerable_timer = 0
+    local vector_x, vector_y = 0, 0
 
-    local dx, dy = 0, 0
-    if params and params.dx and params.dy then
-        dx = params.dx
-        dy = params.dy
-    else
-        if love.keyboard.isDown(MOVE_LEFT)  then dx = dx - 1 end
-        if love.keyboard.isDown(MOVE_RIGHT) then dx = dx + 1 end
-        if love.keyboard.isDown(MOVE_UP)    then dy = dy - 1 end
-        if love.keyboard.isDown(MOVE_DOWN)  then dy = dy + 1 end
-        if dx == 0 and dy == 0 then
-            if self.entity.direction == 'up' then dy = -1
-            elseif self.entity.direction == 'down' then dy = 1
-            elseif self.entity.direction == 'left' then dx = -1
-            elseif self.entity.direction == 'right' then dx = 1
-            end
-        end
+    if params then
+        vector_x = params.vector_x or 0
+        vector_y = params.vector_y or 0
     end
 
-    local len = math.sqrt(dx * dx + dy * dy)
+    local len = math.sqrt(vector_x * vector_x + vector_y * vector_y)
     if len > 0 then
-        self.dx = dx / len
-        self.dy = dy / len
-    else
-        self.dx = 0
-        self.dy = 0
+        self.direction_x = vector_x / len
+        self.direction_y = vector_y / len
     end
 end
 
+
 function PlayerDodgeState:update(dt)
-    self.entity.invulnerable = true
-    self.dodgeTimer = self.dodgeTimer + dt
+    --invulnerability handled in Player:update, here we just track dodge movement and timer to return to normal state at end of dodge
+    self.dodge_timer = self.dodge_timer + dt
+    local moveAmount = self.dodge_speed * dt
 
-    -- movement along vector
-    local moveAmount = self.dodgeSpeed * dt
-    self.entity.x = self.entity.x + self.dx * moveAmount
-    self.entity.y = self.entity.y + self.dy * moveAmount
+    --Check movement with collision to prevent moving through walls during dodge, but allow movement through enemies still
+    self.entity.room:moveEntity(self.entity, self.direction_x * moveAmount, self.direction_y * moveAmount)
 
-    -- pick animation based on direction
-    if math.abs(self.dx) > math.abs(self.dy) then
-        if self.dx < 0 then
-            self.entity:change_animation('walk-left')
+    --No dodge animation in sprite sheet so I use the walk animation for now
+    if math.abs(self.direction_x) > math.abs(self.direction_y) then
+        if self.direction_x < 0 then
+            self.entity:changeAnimation('walk_left')
         else
-            self.entity:change_animation('walk-right')
+            self.entity:changeAnimation('walk_right')
         end
     else
-        if self.dy < 0 then
-            self.entity:change_animation('walk-up')
+        if self.direction_y < 0 then
+            self.entity:changeAnimation('walk_up')
         else
-            self.entity:change_animation('walk-down')
+            self.entity:changeAnimation('walk_down')
         end
     end
 
-    -- end dodge
-    if self.dodgeTimer >= self.dodgeDuration then
-        self.entity.invulnerable = false
-
+    --At end of dodge, return to idle or walk depending on if there is movement input
+    if self.dodge_timer >= self.dodge_distance / self.dodge_speed then
         if love.keyboard.isDown(MOVE_UP) or
             love.keyboard.isDown(MOVE_DOWN) or
             love.keyboard.isDown(MOVE_LEFT) or
             love.keyboard.isDown(MOVE_RIGHT) then
-            self.entity:change_state('walk')
+            self.entity.invulnerable = false
+            self.entity:changeState('walk')
         else
-            self.entity:change_state('idle')
+            self.entity.invulnerable = false
+            self.entity:changeState('idle')
         end
     end
 end

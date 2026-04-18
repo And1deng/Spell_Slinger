@@ -1,14 +1,21 @@
-local DebugLog = {}
+--[[DebugLog
+Simple logging utility for debugging different features and functions
+Not very consistent as I only added it to a few places, but can be expanded as needed
+]]--
 
-DebugLog.enabled = true
+local debug_log = {}
 
-function DebugLog.log(fmt, ...)
-    if not DebugLog.enabled then return end
+function debug_log.log(fmt, ...)
+    if not DEBUG_MODE then 
+        return
+    end
 
     local ok, msg = pcall(string.format, fmt, ...)
-    if not ok then msg = tostring(fmt) end
+    
+    if not ok then 
+        msg = tostring(fmt) 
+    end
 
-    -- write to console as before
     print(msg)
 
     -- append to file in project's working dir
@@ -19,4 +26,4 @@ function DebugLog.log(fmt, ...)
     end
 end
 
-return DebugLog
+return debug_log

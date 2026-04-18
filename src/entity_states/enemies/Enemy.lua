@@ -1,9 +1,28 @@
+--[[Enemy
+Base enemy class
+Requires 4 states for now: idle, walk, attack, death
+Starts in idle but uses a simple AI to determine what it will do (currently just idle, walk, or attack if player is in range)
+Includes a helper function to track player and return normalized vector towards the player
+]]--
 Enemy = Class{__includes = Entity}
+
 
 function Enemy:init(def)
     Entity.init(self, def)
+    self.damage = def.damage
+    self.attack_name = def.attack_name
+    self.chase_range = def.chase_range
+    self.attack_range = def.attack_range
+    self.ranged = def.ranged or false
 
-    -- prefer base enemy states where available
+    if DEBUG_MODE then
+    DebugLog.log("[Enemy:init] attack_name=%s ranged=%s chase_range=%s attack_range=%s",
+        tostring(self.attack_name),
+        tostring(self.ranged),
+        tostring(self.chase_range),
+        tostring(self.attack_range))
+end
+
     self.state_machine = StateMachine {
         ['idle']   = function() return BaseEnemyIdle(self) end,
         ['walk']   = function() return EntityWalkState(self) end,
@@ -13,33 +32,30 @@ function Enemy:init(def)
 
     self.state_machine:change('idle')
 
-    -- store attack name (optional) and instantiate AI
-    self.attack_name = def.attack or nil
-
-    -- prefer an aggro AI profile if provided, else default roaming AI
-    if def.ai_profile and def.ai_profile.type == 'aggro' then
-        self.ai = BaseEnemyAggro(self, def.room or nil, def.ai_profile.range)
-        local DebugLog = require 'src.DebugLog'
-        DebugLog.log("[Enemy:init] Created aggro AI for enemy: attack=%s range=%s room=%s", tostring(self.attack_name), tostring(def.ai_profile.range), tostring(def.room))
+    --Initialize AI based on profile in entity_definitions
+    if def.ai_profile == 'aggro' then
+        self.ai = BaseEnemyAggroAI(self, def.room, def.chase_range, def.attack_range, def.ranged)
     else
-        self.ai = BaseEnemyAI(self, def.room or nil)
-        local DebugLog = require 'src.DebugLog'
-        DebugLog.log("[Enemy:init] Created roaming AI for enemy: attack=%s room=%s", tostring(self.attack_name), tostring(def.room))
+        --For passive enemies, just use random roaming AI
+        self.ai = BaseEnemyAI(self, def.room)
     end
 end
 
 function Enemy:update(dt)
+    if self.dead then
+        Entity.update(self, dt)
+        return
+    end
+
     if self.ai and self.ai.update then
         self.ai:update(dt)
     end
 
-    if self.state_machine then
-        self.state_machine:update(dt)
-    end
+    Entity.update(self, dt)
 end
 
--- Simple helper: return normalized vector toward the player if present
-function Enemy:get_nearest_target_vector(maxRange)
+--Track enemy to player and return normalized vector pointing to player, or nil if no player or out of range
+function Enemy:enemyGetNearestTargetVector()
     if not self.room or not self.room.player then return nil end
 
     local center_x = self.x + (self.width or 0) / 2
@@ -48,12 +64,13 @@ function Enemy:get_nearest_target_vector(maxRange)
     local target_x = self.room.player.x + (self.room.player.width or 0) / 2
     local target_y = self.room.player.y + (self.room.player.height or 0) / 2
 
-    local dx = target_x - center_x
-    local dy = target_y - center_y
-    local d = math.sqrt(dx * dx + dy * dy)
+    local vector_x = target_x - center_x
+    local vector_y = target_y - center_y
+    local distance_to_player = math.sqrt(vector_x * vector_x + vector_y * vector_y)
 
-    if d == 0 then return nil end
-    if maxRange and d > maxRange then return nil end
+    if distance_to_player == 0 then
+        return 0, 0, self.room.player, 0
+    end
 
-    return dx / d, dy / d, self.room.player
+    return vector_x / distance_to_player, vector_y / distance_to_player, self.room.player, distance_to_player
 end

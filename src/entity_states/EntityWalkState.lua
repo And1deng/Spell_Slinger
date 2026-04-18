@@ -1,58 +1,45 @@
+--[[EntityWalkState
+Base walking state for all entities
+Check for direction and move entity accordingly, using room's moveEntity function to handle collisions
+]]--
+
 EntityWalkState = Class{__includes = BaseState}
 
 function EntityWalkState:init(entity, room)
     self.entity = entity
-    -- self.entity:changeAnimation('walk-down')  -- Commented out for now
     
     self.room = room
 
-    self.moveDuration = 0
-    self.movementTimer = 0
-    
-    self.bumped = false
+    self.move_duration = 0
+    self.movement_timer = 0
+end
+
+function EntityWalkState:enter()
+    if self.entity.direction then
+        self.entity:changeAnimation('walk_' .. self.entity.direction)
+    end
 end
 
 function EntityWalkState:update(dt)
-    self.bumped = false
-    
     if self.entity.direction then
-        local speed = self.entity.walk_speed
-        
-        local newX, newY = self.entity.x, self.entity.y
-        
-        if self.entity.direction == 'left' then
-            newX = newX - speed * dt
-        elseif self.entity.direction == 'right' then
-            newX = newX + speed * dt
-        elseif self.entity.direction == 'up' then
-            newY = newY - speed * dt
-        elseif self.entity.direction == 'down' then
-            newY = newY + speed * dt
-        end
-        
--- Clamp to room/world bounds (not the virtual screen size)
-        local roomWidthPixels = (self.entity.room and self.entity.room.width * TILE_SIZE) or VIRTUAL_WIDTH
-        local roomHeightPixels = (self.entity.room and self.entity.room.height * TILE_SIZE) or VIRTUAL_HEIGHT
+        self.entity:changeAnimation('walk_' .. self.entity.direction)
 
-        local minX, maxX = 20, roomWidthPixels - 20 - self.entity.width
-        local minY, maxY = 20, roomHeightPixels - 20 - self.entity.height
-        
-        if newX < minX then
-            newX = minX
-            self.bumped = true
-        elseif newX > maxX then
-            newX = maxX
-            self.bumped = true
+        local speed = self.entity.walk_speed
+        local dx, dy = 0, 0
+
+        if self.entity.direction == 'left' then
+            dx = -speed * dt
+        elseif self.entity.direction == 'right' then
+            dx = speed * dt
+        elseif self.entity.direction == 'up' then
+            dy = -speed * dt
+        elseif self.entity.direction == 'down' then
+            dy = speed * dt
         end
-        
-        if newY < minY then
-            newY = minY
-            self.bumped = true
-        elseif newY > maxY then
-            newY = maxY
-            self.bumped = true
+
+        local room = self.entity.room or self.room
+        if room and room.moveEntity then
+            room:moveEntity(self.entity, dx, dy)
         end
-        
-        self.entity.x, self.entity.y = newX, newY
     end
 end

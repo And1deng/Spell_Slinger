@@ -1,4 +1,7 @@
--- BaseEnemyDeath.lua
+--[[BaseEnemyDeath
+Death state for the base enemy (slime)
+No death animation at the moment
+]]--
 BaseEnemyDeath = Class{__includes = EntityDeathState}
 
 function BaseEnemyDeath:init(enemy)

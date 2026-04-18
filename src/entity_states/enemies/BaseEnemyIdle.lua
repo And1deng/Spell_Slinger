@@ -1,3 +1,7 @@
+--[[BaseEnemyIdle
+Base idle state for enemies
+Enemies will wait and AI will cause them to change direction or start walking after a random duration
+]]--
 BaseEnemyIdle = Class{__includes = BaseState}
 
 function BaseEnemyIdle:init(entity)
@@ -6,8 +10,7 @@ function BaseEnemyIdle:init(entity)
     self.wait_duration = 0
     self.wait_timer = 0
 
-    -- set an idle animation matching current direction
-    self.entity:change_animation('idle-' .. self.entity.direction)
+    self.entity:changeAnimation('idle_' .. self.entity.direction)
 end
 
 function BaseEnemyIdle:update(dt)
@@ -17,7 +20,7 @@ function BaseEnemyIdle:update(dt)
         self.wait_timer = self.wait_timer + dt
 
         if self.wait_timer > self.wait_duration then
-            self.entity:change_state('walk')
+            self.entity:changeState('walk')
         end
     end
 end

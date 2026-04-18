@@ -1,19 +1,18 @@
--- PlayerIdleState.lua
+--[[PlayerIdleState
+Idle until a movement key is pressed (MOVE + DODGE inputs determined in constants.lua)
+Dodge in current facing direction if DODGE is pressed, even without movement input
+]]--
 PlayerIdleState = Class{__includes = EntityIdleState}
 
 function PlayerIdleState:init(player)
     self.entity = player
 
-    self.entity.offset_y = 24
-    self.entity.offset_x = 40
+    self.entity.offset_x = ENTITY_DEFS['player'].offset_x
+    self.entity.offset_y = ENTITY_DEFS['player'].offset_y
 end
 
 function PlayerIdleState:enter()
-    self.entity.offset_y = 24
-    self.entity.offset_x = 40
-
-    -- set idle animation based on facing direction
-    self.entity:change_animation('idle-' .. self.entity.direction)
+    self.entity:changeAnimation('idle_' .. self.entity.direction)
 end
 
 function PlayerIdleState:update(dt)
@@ -23,19 +22,18 @@ function PlayerIdleState:update(dt)
         love.keyboard.isDown(MOVE_DOWN) or
         love.keyboard.isDown(MOVE_LEFT) or
         love.keyboard.isDown(MOVE_RIGHT) then
-        self.entity:change_state('walk')
+        self.entity:changeState('walk')
         return
     end
 
-    -- dodge from idle: compute vector and pass as params to dodge state
     if love.keyboard.wasPressed(DODGE) then
-        local dx, dy = 0, 0
-        if self.entity.direction == 'up' then dy = -1
-        elseif self.entity.direction == 'down' then dy = 1
-        elseif self.entity.direction == 'left' then dx = -1
-        elseif self.entity.direction == 'right' then dx = 1
+        local vector_x, vector_y = 0, 0
+        if self.entity.direction == 'up' then vector_y = -1
+        elseif self.entity.direction == 'down' then vector_y = 1
+        elseif self.entity.direction == 'left' then vector_x = -1
+        elseif self.entity.direction == 'right' then vector_x = 1
         end
 
-        self.entity:change_state('dodge', { dx = dx, dy = dy })
+        self.entity:changeState('dodge', { vector_x = vector_x, vector_y = vector_y })
     end
 end

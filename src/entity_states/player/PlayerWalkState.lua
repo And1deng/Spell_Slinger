@@ -1,67 +1,66 @@
+--[[PlayerWalkState
+Move player based on MOVE + DODGE inputs determined in constants.lua, normalized for diagonal movement
+Dodge option has priority over the walk
+]]--
 PlayerWalkState = Class{__includes = EntityWalkState}
 
 function PlayerWalkState:init(player)
     self.entity = player
-    self.entity.offset_y = 24
-    self.entity.offset_x = 40
+    self.entity.offset_x = ENTITY_DEFS['player'].offset_x
+    self.entity.offset_y = ENTITY_DEFS['player'].offset_y
 end
 
 function PlayerWalkState:update(dt)
+    local vector_x, vector_y = 0, 0
 
-    -- gather input
-    local dx, dy = 0, 0
+    --Allows for opposite directions to be cancelled out
+    if love.keyboard.isDown(MOVE_LEFT)  then vector_x = vector_x - 1 end
+    if love.keyboard.isDown(MOVE_RIGHT) then vector_x = vector_x + 1 end
 
-    if love.keyboard.isDown(MOVE_LEFT)  then dx = dx - 1 end
-    if love.keyboard.isDown(MOVE_RIGHT) then dx = dx + 1 end
-    if love.keyboard.isDown(MOVE_UP)    then dy = dy - 1 end
-    if love.keyboard.isDown(MOVE_DOWN)  then dy = dy + 1 end
+    if love.keyboard.isDown(MOVE_UP)    then vector_y = vector_y - 1 end
+    if love.keyboard.isDown(MOVE_DOWN)  then vector_y = vector_y + 1 end
 
-    local len = math.sqrt(dx*dx + dy*dy)
+    local normalizedLen = math.sqrt(vector_x*vector_x + vector_y*vector_y)
 
-    -- dodge (pass raw dx/dy to PlayerDodgeState)
     if love.keyboard.wasPressed(DODGE) then
-        -- if not moving, dodge in direction player is facing
-        if dx == 0 and dy == 0 then
-            if self.entity.direction == 'up' then dy = -1
-            elseif self.entity.direction == 'down' then dy = 1
-            elseif self.entity.direction == 'left' then dx = -1
-            elseif self.entity.direction == 'right' then dx = 1
+        --Default to direction in case there is no deciding vector to dodge in
+        if vector_x == 0 and vector_y == 0 then
+            if self.entity.direction == 'up' then vector_y = -1
+            elseif self.entity.direction == 'down' then vector_y = 1
+            elseif self.entity.direction == 'left' then vector_x = -1
+            elseif self.entity.direction == 'right' then vector_x = 1
             end
         end
-        self.entity:change_state('dodge', { dx, dy})
-        return
+        self.entity:changeState('dodge', { vector_x = vector_x, vector_y = vector_y })
     end
 
-    -- if no input → idle
-    if len == 0 then
-        self.entity:change_state('idle')
+    if normalizedLen == 0 then
+        self.entity:changeState('idle')
         return
+    else
+        vector_x = vector_x / normalizedLen
+        vector_y = vector_y / normalizedLen
     end
 
-    -- normalize movement
-    dx = dx / len
-    dy = dy / len
-
-    -- apply movement
-    self.entity.x = self.entity.x + dx * self.entity.walk_speed * dt
-    self.entity.y = self.entity.y + dy * self.entity.walk_speed * dt
-
-    -- choose animation based on dominant axis
-    if math.abs(dx) > math.abs(dy) then
-        if dx < 0 then
+    --Whichever vector is most dominant determines general "direction" of the player and animation
+    if math.abs(vector_x) > math.abs(vector_y) then
+        if vector_x < 0 then
             self.entity.direction = 'left'
-            self.entity:change_animation('walk-left')
+            self.entity:changeAnimation('walk_left')
         else
             self.entity.direction = 'right'
-            self.entity:change_animation('walk-right')
+            self.entity:changeAnimation('walk_right')
         end
     else
-        if dy < 0 then
+        if vector_y < 0 then
             self.entity.direction = 'up'
-            self.entity:change_animation('walk-up')
+            self.entity:changeAnimation('walk_up')
         else
             self.entity.direction = 'down'
-            self.entity:change_animation('walk-down')
+            self.entity:changeAnimation('walk_down')
         end
     end
+
+    --Movement passed to room for collision resolution
+    self.entity.room:moveEntity(self.entity, vector_x * self.entity.walk_speed * dt, vector_y * self.entity.walk_speed * dt)
 end

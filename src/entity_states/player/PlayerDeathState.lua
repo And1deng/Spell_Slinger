@@ -1,4 +1,5 @@
--- PlayerDeathState.lua
+--[[PlayerDeathState
+]]--
 PlayerDeathState = Class{__includes = EntityDeathState}
 
 function PlayerDeathState:init(player)

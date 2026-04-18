@@ -1,13 +1,17 @@
+--[[EntityAttackState
+Base attack state for all entities
+Handles attack animation timing and logic for unique windup times and fire logic
+]]--
 EntityAttackState = Class{__includes = BaseState}
 
 function EntityAttackState:init(entity, attack)
     self.entity = entity
-    self.attack = attack -- in the entity definitions
+    self.attack = attack 
 end
 
 function EntityAttackState:enter()
     self.timer = 0
-    self.entity:change_animation(self.attack.animation)
+    self.entity:changeAnimation(self.attack.animation)
 end
 
 function EntityAttackState:update(dt)
@@ -15,11 +19,12 @@ function EntityAttackState:update(dt)
 
     if self.timer >= self.attack.windup and not self.fired then
         self.fired = true
-        if self.attack.on_fire then
-            self.attack.on_fire(self.entity)
+        if self.attack.onFire then
+            self.attack.onFire(self.entity)
         end
     end
 
+    --Reset to idle as a default
     if self.timer >= self.attack.total_duration then
         self.entity.state_machine:change('idle')
     end

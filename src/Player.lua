@@ -1,3 +1,8 @@
+--[[Player
+Credit to Colton Ogden's CS50G work for the base structure and functions of this class
+Defines the player and provides functions to support spell casting based on user input
+Auto aim system for spells that targets nearest enemy within range and on screen, or in facing direction if no valid targets
+]]--
 Player = Class{__includes = Entity}
 
 function Player:init(def)
@@ -8,16 +13,36 @@ function Player:init(def)
     self.cast_timer = 0
     self.cast_timeout = 2.0
     self.max_cast_inputs = 3
+    self.pending_spell = nil
+    self.windup = 0
+    self.windup_timer = 0
 end
 
 function Player:update(dt)
     Entity.update(self, dt)
+    self:updateCast(dt)
+
     --Separate update function for casting system to allow player to cast while moving/dodging
-    self:update_cast(dt)
+    if self.pending_spell then
+        self.windup_timer = self.windup_timer + dt
+
+        if self.windup_timer >= self.windup then
+            if self.pending_spell.onCast(self) then
+                self.pending_spell.onCast(self)
+            end
+
+            self.pending_spell = nil
+            self.windup = 0
+            self.windup_timer = 0
+        end
+    end
 end
 
-function Player:update_cast(dt)
-    -- Clear cast cache based on timer
+function Player:updateCast(dt)
+    if self.pending_spell then
+        return
+    end
+
     self.cast_timer = self.cast_timer + dt
     if self.cast_timer > self.cast_timeout then
         self.cast_buffer = {}
@@ -31,33 +56,28 @@ function Player:update_cast(dt)
     elseif love.keyboard.wasPressed("right") then pressed = "right"
     end
 
-    --reset cast timer since player is still active
     if pressed then
         table.insert(self.cast_buffer, pressed)
         self.cast_timer = 0
     end
 
-    --Once 3 inputs added, check attack_definitions.lua for match
     if #self.cast_buffer == self.max_cast_inputs then
-        local spell = self:match_spell()
-        
+        local spell = self:matchSpell()
+
+        self.cast_buffer = {}
+        self.cast_timer = 0
+
         if spell then
-            if spell.on_cast then
-                spell.on_cast(self)
-            end
-            --Reset buffer after cast
-            self.cast_buffer = {}
-            self.cast_timer = 0
-        else
-            --No match, clear buffer + reset timer
-            self.cast_buffer = {}
-            self.cast_timer = 0
+            self.pending_spell = spell
+            self.windup = spell.windup or 0
+            self.windup_timer = 0
         end
     end
 end
 
+
 --Compare 3 input pattern with ATTACK_DEFS
-function Player:match_spell()
+function Player:matchSpell()
     for spellName, spell in pairs(ATTACK_DEFS) do
         if #spell.input == self.max_cast_inputs then
             if self.cast_buffer[1] == spell.input[1] and
@@ -75,28 +95,40 @@ function Player:render()
 end
 
 --Rendering for casting system UI. Shows current inputs in buffer
-function Player:render_cast()
-    if #self.cast_buffer == 0 then
-        return
+function Player:renderCast()
+    if self.pending_spell then
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(gFonts['DefaultFont'])
+
+        love.graphics.printf(
+            "Casting",
+            0,
+            VIRTUAL_HEIGHT - 32,
+            VIRTUAL_WIDTH,
+            "center"
+        )
+    else
+        if #self.cast_buffer == 0 then
+            return
+        end
+        love.graphics.setColor(1, 1, 1, 1)
+        love.graphics.setFont(gFonts['DefaultFont'])
+
+        local text = table.concat(self.cast_buffer, " ")
+
+        -- Draw near the bottom of the screen
+        love.graphics.printf(
+            "Cast: " .. text,
+            0,
+            VIRTUAL_HEIGHT - 32,
+            VIRTUAL_WIDTH,
+            "center"
+        )
     end
-
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.setFont(gFonts['DefaultFont'])
-
-    local text = table.concat(self.cast_buffer, " ")
-
-    -- Draw near the bottom of the screen
-    love.graphics.printf(
-        "Cast: " .. text,
-        0,
-        VIRTUAL_HEIGHT - 32,
-        VIRTUAL_WIDTH,
-        "center"
-    )
 end
 
 --Spell auto aim system, gets unit vector to nearest target within range and on screen, or nil if no valid targets
-function Player:get_nearest_target_vector(maxRange)
+function Player:playerGetNearestTargetVector(maxRange)
     if not self.room then return nil end
 
     local nearest = nil
@@ -108,17 +140,17 @@ function Player:get_nearest_target_vector(maxRange)
     for _, e in ipairs(self.room.entities) do
         if e ~= self and not e.dead then
             --Check if target is visible on screen
-            if self:target_on_screen(e) then
+            if self:targetOnScreen(e) then
                 local target_x = e.x + (e.width or 0) / 2
                 local target_y = e.y + (e.height or 0) / 2
 
-                local dx = target_x - center_x
-                local dy = target_y - center_y
-                local d = math.sqrt(dx * dx + dy * dy)
+                local vector_x = target_x - center_x
+                local vector_y = target_y - center_y
+                local len = math.sqrt(vector_x * vector_x + vector_y * vector_y)
                 --Check spell range if maxRange provided, and if nearest target so far
-                if (not maxRange or d <= maxRange) and d < nearest_dist then
-                    nearest_dist = d
-                    nearest = {dx = dx, dy = dy, target = e} --unit vector to target and reference to target entity
+                if (not maxRange or len <= maxRange) and len < nearest_dist then
+                    nearest_dist = len
+                    nearest = {vector_x = vector_x, vector_y = vector_y, target = e} --Unit vector to target and reference to target entity
                 end
             end
         end
@@ -127,27 +159,45 @@ function Player:get_nearest_target_vector(maxRange)
     if not nearest then return nil end
 
     --Normalize vector to nearest target
-    local len = math.sqrt(nearest.dx * nearest.dx + nearest.dy * nearest.dy)
+    local len = math.sqrt(nearest.vector_x * nearest.vector_x + nearest.vector_y * nearest.vector_y)
     if len == 0 then return nil end
 
-    return nearest.dx / len, nearest.dy / len, nearest.target
+    return nearest.vector_x / len, nearest.vector_y / len, nearest.target
 end
 
---target on screen checking
-function Player:target_on_screen(target)
+--Target on screen checking
+function Player:targetOnScreen(target)
     --Get cam position for screen checking
-    local camx, camy = gStateMachine.current:get_camera()
-    local target_x = target.x - camx
-    local target_y = target.y - camy
+    local cam_x, cam_y = gStateMachine.current:getCamera()
+    local target_x = target.x - cam_x
+    local target_y = target.y - cam_y
     local target_w = target.width
     local target_h = target.height
 
-    local screen_width = VIRTUAL_WIDTH
-    local screen_height = VIRTUAL_HEIGHT
+    local screenWidth = VIRTUAL_WIDTH
+    local screenHeight = VIRTUAL_HEIGHT
 
-    if target_x + target_w < 0 or target_x > screen_width or
-       target_y + target_h < 0 or target_y > screen_height then
+    if target_x + target_w < 0 or target_x > screenWidth or
+       target_y + target_h < 0 or target_y > screenHeight then
         return false
     end
     return true
+end
+
+function Player:dealDamage(dmg)
+    if self.dead then return end
+
+    self.health = self.health - dmg
+
+    if self.health <= 0 then
+        self.dead = true
+        self:changeState('death')
+        self:changeAnimation('death')
+    end
+end
+
+function Player:goInvulnerable()
+    self.invulnerable = true
+    self.invulnerable_duration = ENTITY_DEFS['player'].invulnerable_length
+    self.invulnerable_timer = 0
 end
