@@ -1,6 +1,6 @@
 --[[Util
 Credit to Colton Ogden's CS50G work for the GenerateQuads function
-Generates quads from a sprite sheet numbered left to right, top to bottom. Used for player and enemy sprites as well as spell projectiles.
+Generates quads from a sprite sheet numbered left to right, top to bottom. Used for splitting sprites for any animations.
 ]]--
 
 --Given a sprite sheet, and tile width and height, generate sprite quads

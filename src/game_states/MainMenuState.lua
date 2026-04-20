@@ -12,6 +12,10 @@ function MainMenuState:init()
     self.background = BackgroundParallax()
 end
 
+function MainMenuState:enter()
+    selected_option = 0 
+end
+
 function MainMenuState:update(dt)
     self.background:update(dt)
 

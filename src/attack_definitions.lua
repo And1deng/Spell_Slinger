@@ -276,12 +276,11 @@ ENEMY_ATTACK_DEFS = {
     },
     archer_shoot = {
         windup = 1,
-        lifetime = 1,
+        lifetime = 2,
         width = 8,
         height = 8,
         speed = 100,
-        damage = 2,
-        lifetime = 2,
+        damage = 3,
 
         onFire = function(entity)
             local attack = ENEMY_ATTACK_DEFS['archer_shoot']
@@ -300,11 +299,9 @@ ENEMY_ATTACK_DEFS = {
                 target_vector_x, target_vector_y = entity:enemyGetNearestTargetVector()
             end
 
-            -- Spawn position (center of entity sprite), hardcoded + 32 because I accidentally used a 64x64 sprite for player
             local projectile_center_x = entity.x + entity.width / 2
             local projectile_center_y = entity.y + entity.height / 2
 
-            -- If no valid target vector, cancel attack
             if target_vector_x == nil or target_vector_y == nil then
                 return
             end

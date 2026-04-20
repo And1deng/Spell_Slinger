@@ -6,6 +6,10 @@ function PauseMenuState:init()
     self.background = BackgroundParallax()
 end
 
+function PauseMenuState:enter()
+    selected_option = 0 
+end
+
 function PauseMenuState:update(dt)
     self.background:update(dt)
 

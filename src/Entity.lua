@@ -88,11 +88,11 @@ function Entity:changeState(name, params)
     self.state_machine:change(name, params)
 end
 function Entity:changeAnimation(name)
-    local newAnimation = self.animations[name]
-    if not newAnimation then return end
+    local new_animation = self.animations[name]
+    if not new_animation then return end
 
-    if self.currentAnimation ~= newAnimation then
-        self.currentAnimation = newAnimation
+    if self.currentAnimation ~= new_animation then
+        self.currentAnimation = new_animation
         self.currentAnimation:refresh()
     end
 end

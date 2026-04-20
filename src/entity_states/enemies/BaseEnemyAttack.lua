@@ -3,7 +3,7 @@ Attack state for enemies
 Ranged/custom attacks use attack_def.onFire
 Melee attacks use a temporary hitbox in front of the enemy
 ]]--
-BaseEnemyAttack = Class{__includes = BaseState}
+BaseEnemyAttack = Class{__includes = EntityAttackState}
 
 function BaseEnemyAttack:init(entity)
     self.entity = entity

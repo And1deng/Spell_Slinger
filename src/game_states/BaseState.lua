@@ -20,5 +20,3 @@ end
 function BaseState:render()
 end
 
-function BaseState:process_ai(params, dt)
-end

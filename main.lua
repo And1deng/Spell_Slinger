@@ -18,7 +18,7 @@ function love.load()
         resizable = true
     })
 
-    -- is this needed? math.randomseed(os.time())
+    math.randomseed(os.time())
 
     --Setup for simplified state machine
     gStateMachine = StateMachine {
@@ -30,39 +30,28 @@ function love.load()
     gStateMachine:change('main_menu')
 
     love.graphics.setFont(gFonts['TitleFont'])
-    
-    --Init input table for key tracking
-    love.keyboard.keysPressed = {}
+        love.keyboard.keysPressed = {}
 end
 
---Resize function for push library, to handle window resizing
 function love.resize(w, h)
     push:resize(w, h)
 end
 
---Input recording
 function love.keypressed(key)
     love.keyboard.keysPressed[key] = true
 end
 
---Input checking
 function love.keyboard.wasPressed(key)
     return love.keyboard.keysPressed[key]
 end
 
 function love.update(dt)
-    --Run current state update function
     gStateMachine:update(dt)
-    --Reset input table after so inputs arent saved across frames
     love.keyboard.keysPressed = {}
 end
 
 function love.draw()
-    --For virtual resolution scaling
     push:start()
-
-    --Run current state render function
     gStateMachine.current:render()
-    
     push:finish()
 end

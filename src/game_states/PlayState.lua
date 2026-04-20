@@ -49,12 +49,14 @@ function PlayState:reset()
 
     self.room = Room(self.player)
     self.player.room = self.room
+    self:updateCamera()
+    
 
     self.room:generateWorld()
     self.room:generateEntities()
 
     self.player:changeState('idle')
-    self.player:changeAnimation('idle')
+    self.player:changeAnimation('idle_down')
 end
 
 --Move camera to follow player with map clamping to prevent showing areas outside of map bounds

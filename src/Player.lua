@@ -27,7 +27,7 @@ function Player:update(dt)
         self.windup_timer = self.windup_timer + dt
 
         if self.windup_timer >= self.windup then
-            if self.pending_spell.onCast(self) then
+            if self.pending_spell.onCast then
                 self.pending_spell.onCast(self)
             end
 
@@ -50,10 +50,10 @@ function Player:updateCast(dt)
     end
 
     local pressed = nil
-    if love.keyboard.wasPressed("up") then pressed = "up"
-    elseif love.keyboard.wasPressed("down") then pressed = "down"
-    elseif love.keyboard.wasPressed("left") then pressed = "left"
-    elseif love.keyboard.wasPressed("right") then pressed = "right"
+    if love.keyboard.wasPressed("up") then pressed = INPUT_UP
+    elseif love.keyboard.wasPressed("down") then pressed = INPUT_DOWN
+    elseif love.keyboard.wasPressed("left") then pressed = INPUT_LEFT
+    elseif love.keyboard.wasPressed("right") then pressed = INPUT_RIGHT
     end
 
     if pressed then
@@ -174,11 +174,11 @@ function Player:targetOnScreen(target)
     local target_w = target.width
     local target_h = target.height
 
-    local screenWidth = VIRTUAL_WIDTH
-    local screenHeight = VIRTUAL_HEIGHT
+    local screen_width = VIRTUAL_WIDTH
+    local screen_height = VIRTUAL_HEIGHT
 
-    if target_x + target_w < 0 or target_x > screenWidth or
-       target_y + target_h < 0 or target_y > screenHeight then
+    if target_x + target_w < 0 or target_x > screen_width or
+       target_y + target_h < 0 or target_y > screen_height then
         return false
     end
     return true

@@ -10,9 +10,7 @@ Defined texteures, frames, and fonts for easy access throughout the game
 ]]--
 --Class includes
 Class = require 'lib/class'
-Event = require 'lib/knife.event'
 push = require 'lib/push'
-Timer = require 'lib/knife.timer'
 
 --General resources
 require 'src/StateMachine'
@@ -23,7 +21,6 @@ require 'src/Util'
 require 'src/BackgroundParallax'
 require 'src/Animation'
 require 'src/Projectile'
-require 'src/Hitbox'
 
 --Game states
 require 'src/game_states/BaseState'

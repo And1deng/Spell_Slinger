@@ -14,15 +14,3 @@ function EntityIdleState:init(entity)
     self.wait_duration = 0
     self.wait_timer = 0
 end
-
-function EntityIdleState:process_ai(params, dt)
-    if self.wait_duration == 0 then
-        self.wait_duration = math.random(5)
-    else
-        self.wait_timer = self.wait_timer + dt
-
-        if self.wait_timer > self.wait_duration then
-            self.entity:changeState('walk')
-        end
-    end
-end

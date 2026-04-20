@@ -13,6 +13,13 @@ function BaseEnemyIdle:init(entity)
     self.entity:changeAnimation('idle_' .. self.entity.direction)
 end
 
+function BaseEnemyIdle:enter()
+    self.wait_duration = 0
+    self.wait_timer = 0
+
+    self.entity:changeAnimation('idle_' .. self.entity.direction)
+end
+
 function BaseEnemyIdle:update(dt)
     if self.wait_duration == 0 then
         self.wait_duration = math.random(3)

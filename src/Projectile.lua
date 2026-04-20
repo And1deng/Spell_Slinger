@@ -6,7 +6,7 @@ Projectile = Class{}
 
 function Projectile:init(params)
     --Passed parameters from attack_definitions.lua
-    self.owner = params.owner or nil
+    self.owner = params.owner
     self.texture = params.texture
     self.x = params.x
     self.y = params.y
@@ -19,25 +19,24 @@ function Projectile:init(params)
     self.lifetime = params.lifetime
 
     --Utils for animations and projectile behavior
-    self.animations = params.animations and self:createAnimations(params.animations) or nil
+    self.animation = params.animation and self:createAnimation(params.animation)
+
     self.direction = params.direction or 'right'
     self.age = 0
     self.active = true
     self.sprite_rotation = math.atan2(self.vector_y, self.vector_x)
 
     --Runs with or without animations (so I can use a png for development)
-    if self.animations then
-        local animName = params.animation or next(self.animations)
-        self.currentAnimation = self.animations[animName]
+    if self.animation then
+        local anim_name = params.animation or next(self.animation)
+        self.currentAnimation = self.animation[anim_name]
     else
         self.currentAnimation = nil
     end
 
-    self.hurtbox = Hitbox(params.x, params.y, params.width, params.height)
-
     --Offset if projectile texture is misaligned
-    self.offset_x = params.offset_x or params.offset_x or 0
-    self.offset_y = params.offset_y or params.offset_y or 0
+    self.offset_x = params.offset_x or 0
+    self.offset_y = params.offset_y or 0
 
     if params.vector_x and params.vector_y then
             self.dx = params.vector_x * self.speed
@@ -51,7 +50,6 @@ function Projectile:update(dt)
     end
 
     self.age = self.age + dt
-
     self.x = self.x + self.dx * dt
     self.y = self.y + self.dy * dt
 
@@ -65,10 +63,10 @@ function Projectile:update(dt)
 end
 
 --Both animation functions copied from Entity.lua for future animation support
-function Projectile:createAnimations(animations)
+function Projectile:createAnimation(animation)
     local anims = {}
 
-    for k, def in pairs(animations) do
+    for k, def in pairs(animation) do
         anims[k] = Animation {
             texture = def.texture or 'entities',
             frames = def.frames,
@@ -82,7 +80,7 @@ end
 
 
 function Projectile:changeAnimation(name)
-    local new_animation = self.animations[name]
+    local new_animation = self.animation[name]
     if not new_animation then return end
 
     if self.currentAnimation ~= new_animation then

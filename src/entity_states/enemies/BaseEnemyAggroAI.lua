@@ -38,7 +38,7 @@ function BaseEnemyAggroAI:update(dt)
 
             --Ranged attacks
             if self.enemy.ranged and self.enemy.attack_name and ENEMY_ATTACK_DEFS[self.enemy.attack_name] then
-                if self.enemy.state_machine.current_name ~= 'attack' then
+                if self.enemy.state_machine.current_state ~= 'attack' then
                     if DEBUG_MODE then
                         DebugLog.log("[BaseEnemyAggro] target in attack range; using ranged attack %s", tostring(self.enemy.attack_name))
                     end
@@ -47,9 +47,9 @@ function BaseEnemyAggroAI:update(dt)
                 return
             end
 
-            -- Melee attacks
+            --Melee attacks
             if self.enemy.attack_name and ENEMY_ATTACK_DEFS[self.enemy.attack_name] then
-                if self.enemy.state_machine.current_name ~= 'attack' then
+                if self.enemy.state_machine.current_state ~= 'attack' then
                     if DEBUG_MODE then
                         DebugLog.log("[BaseEnemyAggro] target in attack range; using melee attack %s", tostring(self.enemy.attack_name))
                     end
