@@ -184,18 +184,7 @@ function Player:targetOnScreen(target)
     return true
 end
 
-function Player:dealDamage(dmg)
-    if self.dead then return end
-
-    self.health = self.health - dmg
-
-    if self.health <= 0 then
-        self.dead = true
-        self:changeState('death')
-        self:changeAnimation('death')
-    end
-end
-
+--Special goInvulnerable for player to be adjustable
 function Player:goInvulnerable()
     self.invulnerable = true
     self.invulnerable_duration = ENTITY_DEFS['player'].invulnerable_length

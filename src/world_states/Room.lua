@@ -5,7 +5,7 @@ Manages entities and player interactions within the room, including collision an
 ]]--
 Room = Class{}
 
-function Room:init(player)
+function Room:init(player, onAddPoints)
     self.width  = MAP_WIDTH
     self.height = MAP_HEIGHT
 
@@ -21,6 +21,7 @@ function Room:init(player)
     self.seed_noise_y = love.math.random(1, 100000)
 
     self.player = player
+    self.onAddPoints = onAddPoints
 end
 
 
@@ -137,42 +138,13 @@ function Room:getRandomFloorPosition()
     end
 end
 
---Spawns 3 slime and 2 archers for testing
-function Room:generateEntities()
-    for i = 1, 3 do
-        local enemy_type = 'slime'
+function Room:generateEntities(enemy_type, amount)
+    for i = 1, amount do
         local enemy_spawn_x, enemy_spawn_y = self:getRandomFloorPosition()
 
         local ent = Enemy {
             room = self,
-            max_health = ENTITY_DEFS[enemy_type].max_health,
-            health = ENTITY_DEFS[enemy_type].max_health,
-            walk_speed = ENTITY_DEFS[enemy_type].walk_speed,
-            animations = ENTITY_DEFS[enemy_type].animations,
-            x = enemy_spawn_x,
-            y = enemy_spawn_y, 
-            width = 16,
-            height = 16,
-            damage = ENTITY_DEFS[enemy_type].damage,
-            ranged = ENTITY_DEFS[enemy_type].ranged or false,
-            attack_name = ENTITY_DEFS[enemy_type].attack_name,
-            ai_profile = ENTITY_DEFS[enemy_type].ai_profile,
-            chase_range = ENTITY_DEFS[enemy_type].chase_range,
-            attack_range = ENTITY_DEFS[enemy_type].attack_range,
-        }
-
-        table.insert(self.entities, ent)
-        if DEBUG_MODE then
-            DebugLog.log("[Room:generateEntities] Spawned enemy #%d attack=%s ai_profile=%s", #self.entities, tostring(ent.attack_name), tostring(ent.ai and ent.ai ~= nil))
-        end
-    end
-
-    for i = 1, 2 do
-        local enemy_type = 'archer'
-        local enemy_spawn_x, enemy_spawn_y = self:getRandomFloorPosition()
-
-        local ent = Enemy {
-            room = self,
+            point_value = ENTITY_DEFS[enemy_type].points,
             max_health = ENTITY_DEFS[enemy_type].max_health,
             health = ENTITY_DEFS[enemy_type].max_health,
             walk_speed = ENTITY_DEFS[enemy_type].walk_speed,
@@ -337,6 +309,10 @@ function Room:update(dt)
                         entity:dealDamage(p.damage)
                         if not entity.dead then
                             entity:goInvulnerable(0.5)
+                        else 
+                            if self.onAddPoints then
+                                self.onAddPoints(entity.point_value)
+                            end
                         end
                         p.active = false
                     end

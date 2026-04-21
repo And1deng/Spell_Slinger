@@ -11,6 +11,7 @@ Defined texteures, frames, and fonts for easy access throughout the game
 --Class includes
 Class = require 'lib/class'
 push = require 'lib/push'
+Timer = require 'lib.knife.timer'
 
 --General resources
 require 'src/StateMachine'
@@ -75,7 +76,8 @@ gTextures = {
     ['arrow'] = love.graphics.newImage('graphics/projectiles/arrow.png'),
     --Enemies
     ['slime'] = love.graphics.newImage('graphics/temp_enemy/Enemies_Green_Slime.png'),
-    ['archer'] = love.graphics.newImage('graphics/temp_enemy/Enemies_Archer.png')
+    ['archer'] = love.graphics.newImage('graphics/temp_enemy/Enemies_Archer.png'),
+    ['mummy'] = love.graphics.newImage('graphics/temp_enemy/Enemies_Mummy.png')
 }
 gFrames = {
     ['tiles'] = GenerateQuads(gTextures['tiles'], 16, 16),
@@ -95,7 +97,8 @@ gFrames = {
     
     --Enemies
     ['slime'] = GenerateQuads(gTextures['slime'], 16, 16),
-    ['archer'] = GenerateQuads(gTextures['archer'], 16, 16)
+    ['archer'] = GenerateQuads(gTextures['archer'], 16, 16),
+    ['mummy'] = GenerateQuads(gTextures['mummy'], 16, 16)
 }
 gFonts = { 
     ['TitleFont'] = love.graphics.newFont('fonts/alagard.ttf', 35),

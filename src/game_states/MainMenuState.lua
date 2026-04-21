@@ -29,7 +29,7 @@ function MainMenuState:update(dt)
 
     if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
         if selected_option == 0 then
-            gStateMachine:change('play')
+            gStateMachine:change('play', { reset = true })
         else
             love.event.quit()
         end

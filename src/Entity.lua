@@ -12,21 +12,21 @@ function Entity:init(def)
     self.animations = self:createAnimations(def.animations or {})
     self.flip = def.flip or false
 
-    self.x = def.x or 0
-    self.y = def.y or 0
-    self.width = def.width or 16
-    self.height = def.height or 16
+    self.x = def.x
+    self.y = def.y
+    self.width = def.width
+    self.height = def.height
 
     --Offsets for sprite differences if needed
-    self.offset_x = def.offset_x or 0
-    self.offset_y = def.offset_y or 0
+    self.offset_x = def.offset_x
+    self.offset_y = def.offset_y
 
-    self.walk_speed = def.walk_speed or 30
+    self.walk_speed = def.walk_speed 
     self.dx = 0
     self.dy = 0
 
     --For healthbar display
-    self.max_health = def.max_health or 1
+    self.max_health = def.max_health
     self.health = def.health or self.max_health
 
     --Can be changed to work with entity specific invulerability frames
@@ -66,7 +66,7 @@ end
 function Entity:dealDamage(dmg)
     if self.dead then return end
 
-    self.health = self.health - dmg
+    self.health = math.max(0, self.health - dmg)
 
     if self.health <= 0 then
         self.dead = true

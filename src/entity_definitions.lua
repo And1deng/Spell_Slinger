@@ -101,10 +101,11 @@ ENTITY_DEFS = {
     ['slime'] = {
         max_health = 3,
         damage = 1,
-        walk_speed = 20,
+        walk_speed = 30,
         chase_range = 100,
         attack_range = 24,
         attack_name = 'slime_melee',
+        points = 100,
         animations = {
             ['walk_left'] = {
                 frames = {6,7,8,9},
@@ -183,6 +184,7 @@ ENTITY_DEFS = {
         chase_range = 200,
         attack_range = 150,
         attack_name = 'archer_shoot',
+        points = 100,
         animations = {
             ['walk_left'] = {
                 frames = {1,2,3,4},
@@ -251,6 +253,89 @@ ENTITY_DEFS = {
                 frames = {1,2,3,4},
                 interval = 0.2,
                 texture = 'archer',
+                looping = false
+            }
+        },
+        ai_profile = 'aggro'
+    },
+    --Mummy free sprite sheet only contains idle animations unfortunately
+    ['mummy'] = {
+        max_health = 10,
+        damage = 2,
+        walk_speed = 10,
+        ranged = false,
+        chase_range = 100,
+        attack_range = 24,
+        attack_name = 'mummy_melee',
+        points = 200,
+        animations = {
+            ['walk_left'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy',
+                flip = true
+            },
+            ['walk_right'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['walk_up'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['walk_down'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['idle_left'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy',
+                flip = true
+            },
+            ['idle_right'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['idle_up'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['idle_down'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['attack_left'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy',
+                flip = true
+            },
+            ['attack_right'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['attack_up'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['attack_down'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy'
+            },
+            ['death'] = {
+                frames = {1,2,3,4},
+                interval = 0.2,
+                texture = 'mummy',
                 looping = false
             }
         },

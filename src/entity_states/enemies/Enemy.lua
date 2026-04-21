@@ -9,6 +9,7 @@ Enemy = Class{__includes = Entity}
 
 function Enemy:init(def)
     Entity.init(self, def)
+    self.point_value = def.point_value
     self.damage = def.damage
     self.attack_name = def.attack_name
     self.chase_range = def.chase_range

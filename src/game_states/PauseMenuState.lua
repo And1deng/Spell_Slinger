@@ -23,8 +23,8 @@ function PauseMenuState:update(dt)
 
     if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
         if selected_option == 0 then
-            gStateMachine:change('play') 
-        else --Need to add settings later
+            gStateMachine:change('play', { reset = false })
+        else
             love.event.quit()
         end
     end

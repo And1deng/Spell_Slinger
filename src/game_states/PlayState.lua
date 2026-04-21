@@ -12,17 +12,75 @@ function PlayState:init()
     self.health_bar_h = 20
     self.health_bar_x = VIRTUAL_WIDTH / 2 - self.health_bar_w / 2
     self.health_bar_y = VIRTUAL_HEIGHT - 40
+    self.enemy_types = { 'slime', 'archer', 'mummy' }
+
+    if DEBUG_MODE then
+        self.score_text_x = 10
+        self.score_text_y = 30
+    else
+        self.score_text_x = 10
+        self.score_text_y = 10
+    end
 end
 
-function PlayState:enter()
-    self:reset()
+function PlayState:enter(params)
+    params = params or {}
+
+    if params.reset == true then
+        self:reset()
+    end
+end
+
+function PlayState:exit()
+    if self.spawn_timer then
+        self.spawn_timer:remove()
+        self.spawn_timer = nil
+    end
+end
+
+function PlayState:getRandomEnemyType()
+    return self.enemy_types[love.math.random(#self.enemy_types)]
+end
+
+--Every "ENEMY_SPAWN_WAVES_PER_GROWTH" waves, increase number of enemies spawned determined by "spawn_count"
+function PlayState:spawnEnemyWave()
+    if not self.room or self.player.dead then
+        return
+    end
+
+    self.spawn_wave = self.spawn_wave + 1
+
+    --Prevent decimals
+    local growth_steps = math.floor(self.spawn_wave / ENEMY_SPAWN_WAVES_PER_GROWTH)
+
+    local spawn_count = ENEMY_SPAWN_START_COUNT + growth_steps * ENEMY_SPAWN_GROWTH_RATE
+    for i = 1, spawn_count do
+        self.room:generateEntities(self:getRandomEnemyType(), 1)
+    end
+end
+
+function PlayState:startSpawnTimer()
+    if self.spawn_timer then
+        self.spawn_timer:remove()
+    end
+
+    self.spawn_timer = Timer.every(ENEMY_SPAWN_INTERVAL_SECONDS, function()
+        self:spawnEnemyWave()
+    end)
 end
 
 --Room generation and player reset in here so game can restart when player dies and re enters from main menu
 function PlayState:reset()
+    if self.spawn_timer then
+        self.spawn_timer:remove()
+        self.spawn_timer = nil
+    end
+
+    self.score = 0
     self.final_cam_x = 0
     self.final_cam_y = 0
     self.transition_alpha = 0
+    self.spawn_wave = 0
 
     local map_center_x = (MAP_WIDTH * TILE_SIZE) / 2
     local map_center_y = (MAP_HEIGHT * TILE_SIZE) / 2
@@ -47,16 +105,29 @@ function PlayState:reset()
         ['death'] = function() return PlayerDeathState(self.player) end,
     }
 
-    self.room = Room(self.player)
+    self.room = Room(self.player, 
+        function(points)
+            self:addScore(points)
+        end
+    )
+
     self.player.room = self.room
     self:updateCamera()
     
 
     self.room:generateWorld()
-    self.room:generateEntities()
+    self.room:generateEntities('slime', 3)
+    self.room:generateEntities('archer', 3)
+    self.room:generateEntities('mummy', 3)
+    self:startSpawnTimer()
 
     self.player:changeState('idle')
     self.player:changeAnimation('idle_down')
+end
+
+function PlayState:addScore(points)
+    
+    self.score = self.score + points
 end
 
 --Move camera to follow player with map clamping to prevent showing areas outside of map bounds
@@ -85,11 +156,15 @@ function PlayState:update(dt)
         self.transition_alpha = math.min(1, self.transition_alpha + dt)
 
         if self.transition_alpha >= 1 then
-            gStateMachine:change('game_over')
+            gStateMachine:change('game_over', {score = self.score})
+
         end
 
         return
     end
+
+
+    Timer.update(dt)
 end
 
 --Render font + health bar UI, also contains debug player hit box for debugging purposes
@@ -103,6 +178,10 @@ function PlayState:renderUI()
 
     love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", self.health_bar_x, self.health_bar_y, self.health_bar_w, self.health_bar_h)
+
+    love.graphics.setFont(gFonts['DefaultFont'])
+    love.graphics.setColor(1, 1, 1, 1)
+    love.graphics.print(string.format("Score: %d", self.score), self.score_text_x, self.score_text_y)
 
     --Display for debug player position
     if DEBUG_MODE then
