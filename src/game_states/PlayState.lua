@@ -11,7 +11,7 @@ function PlayState:init()
     self.health_bar_w = 200
     self.health_bar_h = 20
     self.health_bar_x = VIRTUAL_WIDTH / 2 - self.health_bar_w / 2
-    self.health_bar_y = VIRTUAL_HEIGHT - 40
+    self.health_bar_y = VIRTUAL_HEIGHT - 30
     self.enemy_types = { 'slime', 'archer', 'mummy' }
 
     if DEBUG_MODE then

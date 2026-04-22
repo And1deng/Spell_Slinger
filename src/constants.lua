@@ -16,8 +16,8 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
 --Global DEBUG_MODE to enable all debugging functions
-DEBUG_MODE = true
-SPAWN_ENEMIES = false
+DEBUG_MODE = false
+SPAWN_ENEMIES = true
 
 --Directions
 DIRECTION_VECTORS = {

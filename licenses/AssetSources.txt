@@ -1,6 +1,9 @@
 Fonts:
 Pixel Fonts Pack 2 by Mikiz (free for commercial use)
-Dungeon.mode by datagoblin https://datagoblin.itch.io/dungeonmode
+https://mikiz.itch.io/pixel-fonts-pack-2-by-mikiz
+
+Dungeon.mode by datagoblin
+https://datagoblin.itch.io/dungeonmode
 
 Backgrounds:
 Backgrounds from Dark Forest by Val_DeMar (CC0)
@@ -18,6 +21,6 @@ Player:
 Pixelarium Playable Character by LukeThePolice
 https://lukepolice.itch.io/pixelarium-playable-character?download
 
-Skeleton Archer
+Skeleton Archer & Mummy
 Undead Asset by DeepDiveGameStudio
 https://deepdivegamestudio.itch.io/undead-asset-pack

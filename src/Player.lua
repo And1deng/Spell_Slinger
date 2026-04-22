@@ -103,7 +103,7 @@ function Player:renderCast()
         love.graphics.printf(
             "Casting",
             0,
-            VIRTUAL_HEIGHT - 32,
+            VIRTUAL_HEIGHT - 50,
             VIRTUAL_WIDTH,
             "center"
         )
@@ -120,7 +120,7 @@ function Player:renderCast()
         love.graphics.printf(
             "Cast: " .. text,
             0,
-            VIRTUAL_HEIGHT - 32,
+            VIRTUAL_HEIGHT - 50,
             VIRTUAL_WIDTH,
             "center"
         )
