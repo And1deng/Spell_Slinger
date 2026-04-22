@@ -17,6 +17,7 @@ WINDOW_HEIGHT = 720
 
 --Global DEBUG_MODE to enable all debugging functions
 DEBUG_MODE = true
+SPAWN_ENEMIES = false
 
 --Directions
 DIRECTION_VECTORS = {
@@ -79,7 +80,7 @@ TILE_IDS.WALL = {
     sheet = 'walls',
     variants = {
         TOP_LEFT_CORNER     = 3,
-        TOP_EDGE            = 4,
+        TOP_EDGE            = 14,
         TOP_RIGHT_CORNER    = 5,
 
         LEFT_EDGE           = 8,
@@ -87,7 +88,7 @@ TILE_IDS.WALL = {
         RIGHT_EDGE          = 10,
 
         BOTTOM_LEFT_CORNER  = 13,
-        BOTTOM_EDGE         = 14,
+        BOTTOM_EDGE         = 4,
         BOTTOM_RIGHT_CORNER = 15
     }
 }
@@ -117,7 +118,7 @@ WALL_COLLISION = {
     },
 
     [TILE_IDS.WALL.variants.TOP_EDGE] = {
-        {x = 0, y = 0, width = 16, height = 4}
+        { x = 0, y = 8, width = 16, height = 8 }
     },
 
     [TILE_IDS.WALL.variants.TOP_RIGHT_CORNER] = {
@@ -139,7 +140,7 @@ WALL_COLLISION = {
     },
 
     [TILE_IDS.WALL.variants.BOTTOM_EDGE] = {
-        { x = 0, y = 8, width = 16, height = 8 }
+        {x = 0, y = 0, width = 16, height = 4}
     },
 
     [TILE_IDS.WALL.variants.BOTTOM_RIGHT_CORNER] = {

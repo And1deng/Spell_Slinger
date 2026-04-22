@@ -116,10 +116,12 @@ function PlayState:reset()
     
 
     self.room:generateWorld()
-    self.room:generateEntities('slime', 3)
-    self.room:generateEntities('archer', 3)
-    self.room:generateEntities('mummy', 3)
-    self:startSpawnTimer()
+    if SPAWN_ENEMIES == true then 
+        self.room:generateEntities('slime', 3)
+        self.room:generateEntities('archer', 3)
+        self.room:generateEntities('mummy', 3)
+        self:startSpawnTimer()
+    end
 
     self.player:changeState('idle')
     self.player:changeAnimation('idle_down')

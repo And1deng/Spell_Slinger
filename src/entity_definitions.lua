@@ -3,7 +3,7 @@ Contains player and enemy definitions, including animations and stats. Can be ex
 ]]--
 ENTITY_DEFS = {
     ['player'] = {
-        max_health = 10,
+        max_health = 100,
         walk_speed = 100,
         offset_x = 24,
         offset_y = 26,
