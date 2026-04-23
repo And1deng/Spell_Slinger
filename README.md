@@ -3,7 +3,7 @@ A 2D top-down survival game built in Lua and the LOVE2D framework. This project 
 
 The player can cast spells using arrow-key sequences and defeat enemies. Along with that, players have dodge movement to avoid enemy attacks. As time passes, more enemies spawn, and the waves become more difficult to clear out. The project also implements an extensible game architecture that allows new spells, enemies, and enemy AI behaviors to be easily added. 
 
-![Gameplay Demo](assets/demo.gif)
+![Gameplay Demo](docs/demo.gif)
 
 ## Technical Highlights
 ### World Generation
