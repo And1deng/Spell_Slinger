@@ -45,17 +45,17 @@ There are three spells available for the player to cast
 
 ### Spells:
 FIREBALL - UP UP UP, Medium speed, Medium cast time, Medium damage
+
 ICE SHARD - RIGHT RIGHT RIGHT, High speed, Fast cast time, Low damage
+
 BOULDER - DOWN DOWN DOWN, Slow speed, Slow cast time, High damage
 
 ### Known Limitations
-- Archer and mummy enemies share animation frames across all states 
-  due to sprite sheet limitations
-- Control remapping is stubbed but not yet implemented
-- Debug logging only covers select systems
+Archer and mummy enemies share animation frames across all states due to sprite sheet limitations
+Control remapping is stubbed but not yet implemented
+Debug logging only covers select systems
 
 ### Future Feature Ideas
-- Additional rooms or procedurally generated dungeons
-- More spell variety (healing, evasion, ally summoning)
-- Boss enemies with modified AI behaviors  
-- Audio and sound effects
+Additional rooms or procedurally generated dungeonsMore spell variety (healing, evasion, ally summoning)
+Boss enemies with modified AI behaviors  
+Audio and sound effects
